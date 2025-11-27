@@ -205,6 +205,12 @@ Route::prefix('pesanan')->group(function () {
 
         return response()->json(['data'=>$res],200);
     });
+    
+    Route::get('/{id}',function(int $id){
+        $res = Pesanan::findOrFail($id);
+        
+        return response()->json($res, 200);
+    });
 
     Route::post('/',function(Request $req){
         $payload = [
@@ -231,7 +237,7 @@ Route::prefix('pesanan')->group(function () {
 
         $new=Pesanan::create($payload);
 
-        return response()->json(['status'=>true,"id"=>new->id],201);
+        return response()->json(['status'=>true,"id"=>$new->id],201);
     });
 });
 
@@ -240,6 +246,12 @@ Route::prefix('detail_pesanan')->group(function () {
         $res = DetailPesanan::get();
 
         return response()->json(['data'=>$res],200);
+    });
+    
+    Route::get('/{id}',function(int $id){
+        $res = DetailPesanan::findOrFail($id);
+        
+        return response()->json($res, 200);
     });
 
     Route::post('/',function(Request $req){

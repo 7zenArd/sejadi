@@ -66,7 +66,15 @@ Route::prefix('menu')->group(function () {
         } catch (\Throwable $th) {
             return response()->json(['error'=>'Internal Server Error'],500);
         }
+    });
 
+    Route::get('/{id}', function(int $id){
+        try {
+            $menu = Menu::findOrFail($id);
+            return response()->json($menu, 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Menu not found'], 404);
+        }
     });
 });
 

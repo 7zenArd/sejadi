@@ -229,9 +229,9 @@ Route::prefix('pesanan')->group(function () {
             'is_final'=>$req->is_final,
         ];
 
-        Pesanan::create($payload);
+        $new=Pesanan::create($payload);
 
-        return response()->json(['status'=>true],201);
+        return response()->json(['status'=>true,"id"=>new->id],201);
     });
 });
 

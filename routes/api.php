@@ -29,16 +29,16 @@ Route::prefix('/object/public/assets/')->group(function () {
 Route::prefix('best-sellers')->group(function () {
     Route::get('/',function(Request $request){
             $validated = $request->validate([
-                'limit_count' => 'required|integer|min:1',
-                'days_ago' => 'required|integer|min:0',
+                'limit' => 'required|integer|min:1',
+                'days' => 'required|integer|min:0',
             ]);
 
-            if (!isset($validated['limit_count']) || !isset($validated['days_ago'])) {
+            if (!isset($validated['limit']) || !isset($validated['days'])) {
                 return response()->json(['error' => 'Invalid parameters'], 400);
             }
 
             $now = now();
-            $endDate = $now->addDays(-$validated['days_ago']);
+            $endDate = $now->addDays(-$validated['days']);
 
             $bestSellers = DetailPesanan::select('menu_id')
                 ->whereHas('pesanan', function ($query) use ($endDate) {
@@ -47,7 +47,7 @@ Route::prefix('best-sellers')->group(function () {
                 ->selectRaw('menu_id, SUM(jumlah) as total_sold')
                 ->groupBy('menu_id')
                 ->orderByDesc('total_sold')
-                ->limit($validated['limit_count'])
+                ->limit($validated['limit'])
                 ->with('menu') // Assuming there's a relationship defined in DetailPesanan model
                 ->get();
 

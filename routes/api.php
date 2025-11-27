@@ -28,7 +28,6 @@ Route::prefix('/object/public/assets/')->group(function () {
 
 Route::prefix('get_best_sellers')->group(function () {
     Route::get('/',function(Request $request){
-        try {
             $validated = $request->validate([
                 'limit_count' => 'required|integer|min:1',
                 'days_ago' => 'required|integer|min:0',
@@ -49,10 +48,6 @@ Route::prefix('get_best_sellers')->group(function () {
                 ->get();
 
             return [];
-        } catch (\Throwable $th) {
-            return response()->json(['error'=>'Internal Server Error'],500);
-        }
-
     });
 });
 

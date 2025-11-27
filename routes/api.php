@@ -271,8 +271,7 @@ Route::prefix('detail_pesanan')->group(function () {
             ];
             
             DetailPesanan::create($payload);
-
-            return response()->json(['status'=>true],201);
         }
+        return response()->json(['status'=>true],201);
     });
 });

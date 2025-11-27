@@ -13,7 +13,7 @@ class DiscountCode extends Model
     protected $primaryKey = 'id';
     public $keyType = 'string';
     public $timestamps = false;
-    protected $incrementing = false;
+    public $incrementing = false;
 
     protected $fillable = [
         'id',

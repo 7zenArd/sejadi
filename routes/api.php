@@ -33,6 +33,10 @@ Route::prefix('get_best_sellers')->group(function () {
                 'days_ago' => 'required|integer|min:0',
             ]);
 
+            if (!isset($validated['limit_count']) || !isset($validated['days_ago'])) {
+                return response()->json(['error' => 'Invalid parameters'], 400);
+            }
+
             $now = now();
             $endDate = $now->addDays(-$validated['days_ago']);
 
@@ -47,7 +51,7 @@ Route::prefix('get_best_sellers')->group(function () {
                 ->with('menu') // Assuming there's a relationship defined in DetailPesanan model
                 ->get();
 
-            return [];
+            return response()->json(['data' => $bestSellers], 200);
     });
 });
 

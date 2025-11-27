@@ -26,13 +26,27 @@ Route::prefix('/object/public/assets/')->group(function () {
     });
 });
 
-Route::prefix('rpc')->group(function () {
-    Route::get('/get_best_sellers',function(Request $request){
+Route::prefix('get_best_sellers')->group(function () {
+    Route::get('/',function(Request $request){
         try {
             $validated = $request->validate([
                 'limit_count' => 'required|integer|min:1',
                 'days_ago' => 'required|integer|min:0',
             ]);
+
+            $now = now();
+            $endDate = $now->addDays(-$validated['days_ago']);
+
+            $bestSellers = DetailPesanan::select('menu_id')
+                ->whereHas('pesanan', function ($query) use ($endDate) {
+                    $query->where('created_at', '>=', $endDate);
+                })
+                ->selectRaw('menu_id, SUM(jumlah) as total_sold')
+                ->groupBy('menu_id')
+                ->orderByDesc('total_sold')
+                ->limit($validated['limit_count'])
+                ->with('menu') // Assuming there's a relationship defined in DetailPesanan model
+                ->get();
 
             return [];
         } catch (\Throwable $th) {

@@ -26,7 +26,7 @@ Route::prefix('/object/public/assets/')->group(function () {
     });
 });
 
-Route::prefix('get_best_sellers')->group(function () {
+Route::prefix('best-sellers')->group(function () {
     Route::get('/',function(Request $request){
             $validated = $request->validate([
                 'limit_count' => 'required|integer|min:1',

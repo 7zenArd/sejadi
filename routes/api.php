@@ -5,7 +5,9 @@ use App\Models\CafeSetting;
 use App\Models\DetailPesanan;
 use App\Models\KategoriMenu;
 use App\Models\Menu;
+use App\Models\MenuAdditionalConfig;
 use App\Models\MenuAdditionalsConfig;
+use App\Models\MenuAllowedAdditionals;
 use App\Models\Pesanan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -138,47 +140,49 @@ Route::prefix('additionals')->group(function(){
     });
 });
 
-Route::prefix('menu_allowed_additionals')->group(function () {
+Route::prefix('menu_additional_config')->group(function () {
     Route::get('/',function(){
-        try {
+        // try {
+            $query = MenuAdditionalConfig::get();
+
             $res = [];
 
             foreach($query as $key=>$value){
                 $res['data'][] = [
                     "menu_id"=>$value->menu_id,
-                    "additional_id"=>$value->additonal_id,
-                    "additional_nama"=>$value->menu->nama,
-                    "additional_harga"=>$value->menu->harga,
-                    "additional_tipe"=>$value->additional->tipe
+                    "final_support_additional"=> $value->final_support_additional,
+                    "final_support_dimsum_additional"=> $value->final_support_dimsum_additional
                 ];
             }
 
             return response()->json($res,200);
-        } catch (\Throwable $th) {
-            return response()->json(['error'=>'Internal Server Error'],500);
-        }
+        // } catch (\Throwable $th) {
+        //     return response()->json(['error'=>'Internal Server Error'],500);
+        // }
     });
 });
 
-Route::prefix('v_menu_allowed_additionals')->group(function () {
+Route::prefix('menu_allowed_additionals')->group(function () {
     Route::get('/',function(){
-        try {
+        // try {
+            $query = MenuAllowedAdditionals::get();
+
             $res = [];
 
             foreach($query as $key=>$value){
                 $res['data'][] = [
                     "menu_id"=>$value->menu_id,
-                    "additional_id"=>$value->additonal_id,
-                    "additional_nama"=>$value->menu->nama,
-                    "additional_harga"=>$value->menu->harga,
-                    "additional_tipe"=>$value->additional->tipe
+                    "additional_id"=>$value->additional_id,
+                    "additional_nama"=>$value->additional_nama,
+                    "additional_harga"=>$value->additional_harga,
+                    "additional_tipe"=>$value->additional_tipe
                 ];
             }
 
             return response()->json($res,200);
-        } catch (\Throwable $th) {
-            return response()->json(['error'=>'Internal Server Error'],500);
-        }
+        // } catch (\Throwable $th) {
+        //     return response()->json(['error'=>'Internal Server Error'],500);
+        // }
     });
 });
 

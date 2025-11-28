@@ -10,9 +10,13 @@ class HistoryArchive extends Model
     use HasFactory;
 
     protected $table = 'history_archive';
+
     protected $primaryKey = 'id';
+
     public $keyType = 'string';
+
     public $timestamps = false;
+
     public $incrementing = false;
 
     protected $fillable = [

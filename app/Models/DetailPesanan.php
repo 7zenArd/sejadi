@@ -10,7 +10,9 @@ class DetailPesanan extends Model
     use HasFactory;
 
     protected $table = 'detail_pesanan';
+
     protected $primaryKey = 'id';
+
     public $timestamps = false;
 
     protected $fillable = [

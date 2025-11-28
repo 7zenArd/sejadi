@@ -10,9 +10,13 @@ class DiscountCode extends Model
     use HasFactory;
 
     protected $table = 'discount_codes';
+
     protected $primaryKey = 'id';
+
     public $keyType = 'string';
+
     public $timestamps = false;
+
     public $incrementing = false;
 
     protected $fillable = [

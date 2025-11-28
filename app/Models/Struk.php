@@ -10,7 +10,9 @@ class Struk extends Model
     use HasFactory;
 
     protected $table = 'struk';
+
     protected $primaryKey = 'id';
+
     public $timestamps = false;
 
     protected $fillable = [

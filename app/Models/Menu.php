@@ -10,9 +10,13 @@ class Menu extends Model
     use HasFactory;
 
     protected $table = 'menu';
+
     protected $primaryKey = 'id';
+
     public $keyType = 'string';
+
     public $timestamps = false;
+
     public $incrementing = false;
 
     protected $fillable = [

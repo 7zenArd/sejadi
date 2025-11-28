@@ -10,7 +10,9 @@ class MenuAdditionalsConfig extends Model
     use HasFactory;
 
     protected $table = 'menu_additionals_config';
+
     protected $primaryKey = 'id';
+
     public $timestamps = false;
 
     protected $fillable = [

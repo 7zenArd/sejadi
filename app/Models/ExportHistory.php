@@ -10,9 +10,13 @@ class ExportHistory extends Model
     use HasFactory;
 
     protected $table = 'export_history';
+
     protected $primaryKey = 'id';
+
     public $keyType = 'string';
+
     public $timestamps = false;
+
     public $incrementing = false;
 
     protected $fillable = [

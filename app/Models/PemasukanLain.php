@@ -10,9 +10,13 @@ class PemasukanLain extends Model
     use HasFactory;
 
     protected $table = 'pemasukan_lain';
+
     protected $primaryKey = 'id';
+
     public $keyType = 'string';
+
     public $timestamps = false;
+
     public $incrementing = false;
 
     protected $fillable = [

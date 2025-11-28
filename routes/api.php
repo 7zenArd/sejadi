@@ -3,87 +3,97 @@
 use App\Models\Additional;
 use App\Models\CafeSetting;
 use App\Models\DetailPesanan;
+use App\Models\DiscountCode;
+use App\Models\ExportHistory;
+use App\Models\HistoryArchive;
 use App\Models\KategoriMenu;
 use App\Models\Menu;
 use App\Models\MenuAdditionalConfig;
 use App\Models\MenuAdditionalsConfig;
 use App\Models\MenuAllowedAdditionals;
+use App\Models\PemasukanLain;
+use App\Models\Pengeluaran;
 use App\Models\Pesanan;
+use App\Models\Struk;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-use PhpParser\Node\Stmt\TryCatch;
-use function Laravel\Prompts\select;
 
 Route::prefix('/object/public/assets/')->group(function () {
-    Route::get('/Menu/{foto_path}', function(string $foto_path) {
-        $filePath = public_path('storage/Menu/' . $foto_path);
-        
-        if (!file_exists($filePath)) {
+    Route::get('/Menu/{foto_path}', function (string $foto_path) {
+        $filePath = public_path('storage/Menu/'.$foto_path);
+
+        if (! file_exists($filePath)) {
             return response()->json(['error' => 'File not found'], 404);
         }
-        
+
         return response()->file($filePath);
     });
 });
 
 Route::prefix('best-sellers')->group(function () {
-    Route::get('/',function(Request $request){
-            $validated = $request->validate([
-                'limit' => 'required|integer|min:1',
-                'days' => 'required|integer|min:0',
-            ]);
+    Route::get('/', function (Request $request) {
+        $validated = $request->validate([
+            'limit' => 'required|integer|min:1',
+            'days' => 'required|integer|min:0',
+        ]);
 
-            if (!isset($validated['limit']) || !isset($validated['days'])) {
-                return response()->json(['error' => 'Invalid parameters'], 400);
-            }
+        if (! isset($validated['limit']) || ! isset($validated['days'])) {
+            return response()->json(['error' => 'Invalid parameters'], 400);
+        }
 
-            $now = now();
-            $endDate = $now->addDays(-$validated['days']);
+        $now = now();
+        $endDate = $now->addDays(-$validated['days']);
 
-            $bestSellers = DetailPesanan::select('menu_id')
-                ->whereHas('pesanan', function ($query) use ($endDate) {
-                    $query->where('created_at', '>=', $endDate);
-                })
-                ->selectRaw('menu_id, SUM(jumlah) as total_sold')
-                ->groupBy('menu_id')
-                ->orderByDesc('total_sold')
-                ->limit($validated['limit'])
-                ->with('menu') // Assuming there's a relationship defined in DetailPesanan model
-                ->get();
+        $bestSellers = DetailPesanan::select('menu_id')
+            ->whereHas('pesanan', function ($query) use ($endDate) {
+                $query->where('created_at', '>=', $endDate);
+            })
+            ->selectRaw('menu_id, SUM(jumlah) as total_sold')
+            ->groupBy('menu_id')
+            ->orderByDesc('total_sold')
+            ->limit($validated['limit'])
+            ->with('menu') // Assuming there's a relationship defined in DetailPesanan model
+            ->get();
 
-            return response()->json(['data' => $bestSellers], 200);
+        return response()->json(['data' => $bestSellers], 200);
     });
 });
 
 Route::prefix('menu')->group(function () {
-    Route::get('/',function(Request $req){
+    Route::get('/', function (Request $req) {
         try {
             $has_id = $req->has('id');
             $has_select = $req->has('select');
 
             $query = Menu::query();
 
-            if($has_id){
-                $id = explode('.',$req['id'])[1];
+            if ($has_id) {
+                $id = explode('.', $req['id'])[1];
                 $query = $query->findOrFail($id);
             }
 
-            if ($has_select){
-                $select = explode(',',$req['select']);
-                $query = $query->select($select);
+            if ($has_select) {
+                $select = explode(',', $req['select']);
+                if (in_array('*', $select)) {
+                    $query = $query->select('*');
+                } else {
+                    $query = $query->select($select);
+                }
             }
 
             $query = $has_id ? $query->first() : $query->get();
 
-            return response()->json(!$has_id ? ['data'=>$query] : $query,200);
+            return response()->json(! $has_id ? ['data' => $query] : $query, 200);
         } catch (\Throwable $th) {
-            return response()->json(['error'=>'Internal Server Error'],500);
+            return response()->json(['error' => 'Internal Server Error'], 500);
         }
     });
 
-    Route::get('/{id}', function(int $id){
+    Route::get('/{id}', function (int $id) {
         try {
             $menu = Menu::findOrFail($id);
+
             return response()->json($menu, 200);
         } catch (\Throwable $th) {
             return response()->json(['error' => 'Menu not found'], 404);
@@ -92,199 +102,459 @@ Route::prefix('menu')->group(function () {
 });
 
 Route::prefix('cafe_settings')->group(function () {
-    Route::get('/',function(Request $req){
-        // try {
-            $res = CafeSetting::first();
-            if ($req->has('select')){
-                $select = explode(',',$req['select']);
-                $res = CafeSetting::get()->select($select)->first();
+    Route::put('/', function (Request $req) {
+        try {
+            $cafeSetting = CafeSetting::firstOrFail();
+            $cafeSetting->update($req->all());
+
+            return response()->json(['message' => 'Cafe Setting Updated'], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+    Route::get('/', function (Request $req) {
+        try {
+            $query = CafeSetting::query();
+            if ($req->has('select')) {
+                $select = explode(',', $req['select']);
+                if (in_array('*', $select)) {
+                    $query = $query->select('*');
+                } else {
+                    $query = $query->select($select);
+                }
             }
-            return $res;
-        // } catch (\Throwable $th) {
-        //     return response()->json(["error"=>"Internal Server Error"],500);
-        // }
-    });
-});
+            $res = $query->first();
 
-Route::prefix("categories")->group(function () {
-    Route::get("/",function(){
-        try {
-            return response()->json(["data"=>KategoriMenu::all()->select(['id','nama','urutan'])],200);
+            return response()->json($res, 200);
         } catch (\Throwable $th) {
-            return response()->json(['error'=>"Internal Server Error"],500);
+            return response()->json(['error' => 'Internal Server Error'], 500);
         }
     });
 });
 
-Route::prefix("menu-additional-config")->group(function () {
-    Route::get("/",function(){
+Route::prefix('categories')->group(function () {
+    Route::get('/', function (Request $req) {
         try {
-            return response()->json(['data'=>MenuAdditionalsConfig::all()->select(['menu_id','final_support_additional','final_support_dimsum_additional'])],200);
+            $query = KategoriMenu::query();
+            if ($req->has('select')) {
+                $select = explode(',', $req['select']);
+                if (in_array('*', $select)) {
+                    $query = $query->select('*');
+                } else {
+                    $query = $query->select($select);
+                }
+            }
+
+            return response()->json(['data' => $query->get()], 200);
         } catch (\Throwable $th) {
-            return response()->json(["error"=> "Internal Server Error"],500);
+            return response()->json(['error' => 'Internal Server Error'], 500);
         }
     });
 });
 
-Route::prefix('additionals')->group(function(){
-    Route::get('/', function(Request $req){
+Route::prefix('menu-additional-config')->group(function () {
+    Route::get('/', function (Request $req) {
+        try {
+            $query = MenuAdditionalsConfig::query();
+            if ($req->has('select')) {
+                $select = explode(',', $req['select']);
+                if (in_array('*', $select)) {
+                    $query = $query->select('*');
+                } else {
+                    $query = $query->select($select);
+                }
+            }
+
+            return response()->json(['data' => $query->get()], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+});
+
+Route::prefix('additionals')->group(function () {
+    Route::get('/', function (Request $req) {
         try {
             $query = Additional::query();
-            
-            if($req->has('is_active')){
-                $is_active = explode('.',$req['is_active']);
-                $query = $query->where('is_active',$is_active[0] == 'true' ? 1 : 0);
+
+            if ($req->has('is_active')) {
+                $is_active = explode('.', $req['is_active']);
+                $query = $query->where('is_active', $is_active[0] == 'true' ? 1 : 0);
             }
 
-            $query = $query->get();
-            
-            if($req->has('order')){
-                $order = explode('.',$req['order']);
-                $query = $order[0] == 'asc' ? $query->sortBy($order[0], descending:false) : $query->sortBy($order[0], descending:true);
+            if ($req->has('select')) {
+                $select = explode(',', $req['select']);
+                if (in_array('*', $select)) {
+                    $query = $query->select('*');
+                } else {
+                    $query = $query->select($select);
+                }
             }
 
-            if($req->has('select')){
-                $select = explode(',',$req['select']);
-                $query = $query->select($select);
+            if ($req->has('order')) {
+                $order = explode('.', $req['order']);
+                $query = $query->orderBy($order[0], $order[1] ?? 'asc');
             }
 
-            $res = [];
+            $res = $query->get();
 
-            foreach($query as $key => $value) {
-                $res['data'][] = $value;
-            }
-
-            return response()->json($res,200);
+            return response()->json(['data' => $res], 200);
         } catch (\Throwable $th) {
-            return response()->json(['error'=>'Internal Server Error'],500);
+            return response()->json(['error' => 'Internal Server Error'], 500);
         }
     });
 });
 
 Route::prefix('menu_additional_config')->group(function () {
-    Route::get('/',function(){
-        // try {
-            $query = MenuAdditionalConfig::get();
+    Route::get('/', function (Request $req) {
+        try {
+            $query = MenuAdditionalConfig::query();
+            if ($req->has('select')) {
+                $select = explode(',', $req['select']);
+                if (in_array('*', $select)) {
+                    $query = $query->select('*');
+                } else {
+                    $query = $query->select($select);
+                }
+            }
 
             $res = [];
 
-            foreach($query as $key=>$value){
+            foreach ($query->get() as $key => $value) {
                 $res['data'][] = [
-                    "menu_id"=>$value->menu_id,
-                    "final_support_additional"=> $value->final_support_additional,
-                    "final_support_dimsum_additional"=> $value->final_support_dimsum_additional
+                    'menu_id' => $value->menu_id,
+                    'final_support_additional' => $value->final_support_additional,
+                    'final_support_dimsum_additional' => $value->final_support_dimsum_additional,
                 ];
             }
 
-            return response()->json($res,200);
-        // } catch (\Throwable $th) {
-        //     return response()->json(['error'=>'Internal Server Error'],500);
-        // }
+            return response()->json($res, 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
     });
 });
 
 Route::prefix('menu_allowed_additionals')->group(function () {
-    Route::get('/',function(){
-        // try {
-            $query = MenuAllowedAdditionals::get();
-
-            $res = [];
-
-            foreach($query as $key=>$value){
-                $res['data'][] = [
-                    "menu_id"=>$value->menu_id,
-                    "additional_id"=>$value->additional_id,
-                    "additional_nama"=>$value->additional_nama,
-                    "additional_harga"=>$value->additional_harga,
-                    "additional_tipe"=>$value->additional_tipe
-                ];
+    Route::get('/', function (Request $req) {
+        try {
+            $query = MenuAllowedAdditionals::query();
+            if ($req->has('select')) {
+                $select = explode(',', $req['select']);
+                if (in_array('*', $select)) {
+                    $query = $query->select('*');
+                } else {
+                    $query = $query->select($select);
+                }
             }
 
-            return response()->json($res,200);
-        // } catch (\Throwable $th) {
-        //     return response()->json(['error'=>'Internal Server Error'],500);
-        // }
+            $res = $query->get();
+
+            return response()->json(['data' => $res], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
     });
 });
 
 Route::prefix('pesanan')->group(function () {
-    Route::get('/',function(Request $req){
-        $res = Pesanan::get();
+    Route::get('/', function (Request $req) {
+        try {
+            $query = Pesanan::query();
+            if ($req->has('select')) {
+                $select = explode(',', $req->select);
+                if (in_array('*', $select)) {
+                    $query = $query->select('*');
+                } else {
+                    $query = $query->select($select);
+                }
+            }
+            $res = $query->get();
 
-        if($req->has('select')){
-            $select = explode(',',$req->select);
-            $req = $res->select($select);
+            return response()->json(['data' => $res], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
         }
-
-        return response()->json(['data'=>$res],200);
     });
-    
-    Route::get('/{id}',function(int $id){
+
+    Route::get('/{id}', function (int $id) {
         $res = Pesanan::findOrFail($id);
-        
+
         return response()->json($res, 200);
     });
 
-    Route::post('/',function(Request $req){
+    Route::post('/', function (Request $req) {
         $payload = [
-            'no_meja'=>$req->no_meja,
-            'status'=>$req->status,
-            'total'=>$req->total,
-            'note'=>$req->note,
-            'cancellation_reason'=>$req->cancellation_reason,
-            'cancelled_at'=>$req->cancelled_at,
-            'location_type'=>$req->location_type,
-            'pickup_time'=>$req->pickup_time,
-            'discount_code'=>$req->discount_code,
-            'discount_amount'=>$req->discount_amount,
-            'total_after_discount'=>$req->total_after_discount,
-            'processed_at'=>$req->processed_at,
-            'completed_at'=>$req->completed_at,
-            'is_hidden'=>$req->is_hidden,
-            'archived_at'=>$req->archived_at,
-            'location_area'=>$req->location_area,
-            'metode_pembayaran'=>$req->metode_pembayaran,
-            'bank_qris'=>$req->bank_qris,
-            'is_final'=>$req->is_final,
+            'no_meja' => $req->no_meja,
+            'status' => $req->status,
+            'total' => $req->total,
+            'note' => $req->note,
+            'cancellation_reason' => $req->cancellation_reason,
+            'cancelled_at' => $req->cancelled_at,
+            'location_type' => $req->location_type,
+            'pickup_time' => $req->pickup_time,
+            'discount_code' => $req->discount_code,
+            'discount_amount' => $req->discount_amount,
+            'total_after_discount' => $req->total_after_discount,
+            'processed_at' => $req->processed_at,
+            'completed_at' => $req->completed_at,
+            'is_hidden' => $req->is_hidden,
+            'archived_at' => $req->archived_at,
+            'location_area' => $req->location_area,
+            'metode_pembayaran' => $req->metode_pembayaran,
+            'bank_qris' => $req->bank_qris,
+            'is_final' => $req->is_final,
         ];
 
-        $new=Pesanan::create($payload);
+        $new = Pesanan::create($payload);
 
-        return response()->json(['status'=>true,"id"=>$new->id],201);
+        return response()->json(['status' => true, 'id' => $new->id], 201);
     });
 });
 
 Route::prefix('detail_pesanan')->group(function () {
-    Route::get('/',function(Request $req){
-        $res = DetailPesanan::get();
+    Route::get('/', function (Request $req) {
+        try {
+            $query = DetailPesanan::query();
+            if ($req->has('select')) {
+                $select = explode(',', $req->select);
+                if (in_array('*', $select)) {
+                    $query = $query->select('*');
+                } else {
+                    $query = $query->select($select);
+                }
+            }
+            $res = $query->get();
 
-        return response()->json(['data'=>$res],200);
+            return response()->json(['data' => $res], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
     });
-    
-    Route::get('/{id}',function(int $id){
+
+    Route::get('/{id}', function (int $id) {
         $res = DetailPesanan::findOrFail($id);
-        
+
         return response()->json($res, 200);
     });
 
-    Route::post('/',function(Request $req){
-        foreach ($req->all() as $key=>$value){
+    Route::post('/', function (Request $req) {
+        foreach ($req->all() as $key => $value) {
             $payload = [
-                'pesanan_id'=>$value['pesanan_id'],
-                'menu_id'=>$value['menu_id'],
-                'jumlah'=>$value['jumlah'],
-                'subtotal'=>$value['subtotal'],
-                'note'=>$value['note'],
-                'varian'=>$value['varian'],
-                'additionals'=>$value['additionals'],
-                'dimsum_additionals'=>$value['dimsum_additionals'],
-                'additional_price'=>$value['additional_price'],
-                'base_price'=>$value['base_price'],
-                'is_locked'=>$value['is_locked'],
+                'pesanan_id' => $value['pesanan_id'],
+                'menu_id' => $value['menu_id'],
+                'jumlah' => $value['jumlah'],
+                'subtotal' => $value['subtotal'],
+                'note' => $value['note'],
+                'varian' => $value['varian'],
+                'additionals' => $value['additionals'],
+                'dimsum_additionals' => $value['dimsum_additionals'],
+                'additional_price' => $value['additional_price'],
+                'base_price' => $value['base_price'],
+                'is_locked' => $value['is_locked'],
             ];
-            
+
             DetailPesanan::create($payload);
         }
-        return response()->json(['status'=>true],201);
+
+        return response()->json(['status' => true], 201);
+    });
+});
+
+Route::prefix('auth')->group(function () {
+    Route::post('/login', function (Request $request) {
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string',
+        ]);
+
+        if (! Auth::attempt($credentials)) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $user = Auth::user();
+
+        // Generate token data (replace with your actual token generation logic)
+        $tokenData = [
+            'access_token' => 'your_access_token',
+            'token_type' => 'Bearer',
+            'expires_in' => 3600,
+            'expires_at' => now()->addHours(1)->toDateTimeString(),
+            'refresh_token' => 'your_refresh_token',
+            'last_sign_in_at' => now()->toDateTimeString(),
+        ];
+
+        return response()->json([
+            'access_token' => $tokenData['access_token'],
+            'token_type' => $tokenData['token_type'],
+            'expires_in' => $tokenData['expires_in'],
+            'expires_at' => $tokenData['expires_at'],
+            'refresh_token' => $tokenData['refresh_token'],
+            'user' => [
+                'id' => $user->id,
+                'aud' => 'authenticated',
+                'role' => 'authenticated',
+                'email' => $user->email,
+                'email_confirmed_at' => $user->email_verified_at,
+                'phone' => $user->phone ?? '',
+                'confirmed_at' => $user->email_verified_at,
+                'last_sign_in_at' => $tokenData['last_sign_in_at'],
+                'app_metadata' => [
+                    'provider' => 'email',
+                    'providers' => ['email'],
+                ],
+                'user_metadata' => [
+                    'email_verified' => (bool) $user->email_verified_at,
+                ],
+                'identities' => [
+                    [
+                        'identity_id' => $user->id,
+                        'id' => $user->id,
+                        'user_id' => $user->id,
+                        'identity_data' => [
+                            'email' => $user->email,
+                            'email_verified' => (bool) $user->email_verified_at,
+                            'phone_verified' => false,
+                            'sub' => $user->id,
+                        ],
+                        'provider' => 'email',
+                        'last_sign_in_at' => $tokenData['last_sign_in_at'],
+                        'created_at' => $user->created_at,
+                        'updated_at' => $user->updated_at,
+                        'email' => $user->email,
+                    ],
+                ],
+                'created_at' => $user->created_at,
+                'updated_at' => $user->updated_at,
+                'is_anonymous' => false,
+            ],
+            'weak_password' => null,
+        ]);
+    });
+});
+
+Route::prefix('discount_codes')->group(function () {
+    Route::get('/', function (Request $req) {
+        try {
+            $query = DiscountCode::query();
+            if ($req->has('select')) {
+                $select = explode(',', $req['select']);
+                if (in_array('*', $select)) {
+                    $query = $query->select('*');
+                } else {
+                    $query = $query->select($select);
+                }
+            }
+            $res = $query->get();
+
+            return response()->json(['data' => $res], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+});
+
+Route::prefix('export_histories')->group(function () {
+    Route::get('/', function (Request $req) {
+        try {
+            $query = ExportHistory::query();
+            if ($req->has('select')) {
+                $select = explode(',', $req['select']);
+                if (in_array('*', $select)) {
+                    $query = $query->select('*');
+                } else {
+                    $query = $query->select($select);
+                }
+            }
+            $res = $query->get();
+
+            return response()->json(['data' => $res], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+});
+
+Route::prefix('history_archives')->group(function () {
+    Route::get('/', function (Request $req) {
+        try {
+            $query = HistoryArchive::query();
+            if ($req->has('select')) {
+                $select = explode(',', $req['select']);
+                if (in_array('*', $select)) {
+                    $query = $query->select('*');
+                } else {
+                    $query = $query->select($select);
+                }
+            }
+            $res = $query->get();
+
+            return response()->json(['data' => $res], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+});
+
+Route::prefix('pemasukan_lains')->group(function () {
+    Route::get('/', function (Request $req) {
+        try {
+            $query = PemasukanLain::query();
+            if ($req->has('select')) {
+                $select = explode(',', $req['select']);
+                if (in_array('*', $select)) {
+                    $query = $query->select('*');
+                } else {
+                    $query = $query->select($select);
+                }
+            }
+            $res = $query->get();
+
+            return response()->json(['data' => $res], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+});
+
+Route::prefix('pengeluarans')->group(function () {
+    Route::get('/', function (Request $req) {
+        try {
+            $query = Pengeluaran::query();
+            if ($req->has('select')) {
+                $select = explode(',', $req['select']);
+                if (in_array('*', $select)) {
+                    $query = $query->select('*');
+                } else {
+                    $query = $query->select($select);
+                }
+            }
+            $res = $query->get();
+
+            return response()->json(['data' => $res], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+});
+
+Route::prefix('struks')->group(function () {
+    Route::get('/', function (Request $req) {
+        try {
+            $query = Struk::query();
+            if ($req->has('select')) {
+                $select = explode(',', $req['select']);
+                if (in_array('*', $select)) {
+                    $query = $query->select('*');
+                } else {
+                    $query = $query->select($select);
+                }
+            }
+            $res = $query->get();
+
+            return response()->json(['data' => $res], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
     });
 });

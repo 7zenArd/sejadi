@@ -10,9 +10,13 @@ class CafeSetting extends Model
     use HasFactory;
 
     protected $table = 'cafe_settings';
+
     protected $primaryKey = 'id';
+
     public $keyType = 'string';
+
     public $timestamps = false;
+
     public $incrementing = false;
 
     protected $fillable = [

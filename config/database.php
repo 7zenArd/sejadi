@@ -44,7 +44,7 @@ return [
         ],
 
         // In config/database.php
-        
+
         'mysql' => [
             'driver' => 'mysql',
             'url' => env('DB_URL'),
@@ -62,8 +62,8 @@ return [
             'engine' => null,
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 // 1. ADD THE PERSISTENT CONNECTION OPTION HERE
-                \PDO::ATTR_PERSISTENT => true, 
-                
+                \PDO::ATTR_PERSISTENT => true,
+
                 // 2. KEEP YOUR EXISTING SSL OPTION
                 \PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],

@@ -10,9 +10,13 @@ class Additional extends Model
     use HasFactory;
 
     protected $table = 'additionals';
+
     protected $primaryKey = 'id';
+
     public $keyType = 'string';
+
     public $timestamps = false;
+
     public $incrementing = false;
 
     protected $fillable = [

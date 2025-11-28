@@ -10,7 +10,9 @@ class KategoriMenu extends Model
     use HasFactory;
 
     protected $table = 'kategori_menu';
+
     protected $primaryKey = 'id';
+
     public $timestamps = false;
 
     protected $fillable = [

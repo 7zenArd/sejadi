@@ -6,7 +6,7 @@ ADMIN DASHBOARD PAGE - API DOCUMENTATION
 
 1. Get Store Status (Cafe Open/Close)
 -------------------------------------------------
-endpoint    : https://glpdalyzhouayztwgtkv.supabase.co/rest/v1/cafe_settings
+endpoint    : https://api.sejadikopi.com/api/cafe_settings
 method      : GET
 payload     : -
 header      : {
@@ -23,7 +23,7 @@ response    : 200 {
 
 2. Insert Store Status (First Time Setup)
 -------------------------------------------------
-endpoint    : https://glpdalyzhouayztwgtkv.supabase.co/rest/v1/cafe_settings
+endpoint    : https://api.sejadikopi.com/api/cafe_settings
 method      : POST
 payload     : [
                 {
@@ -45,7 +45,7 @@ response    : 201 {
 
 3. Update Store Status (Open/Close Cafe)
 -------------------------------------------------
-endpoint    : https://glpdalyzhouayztwgtkv.supabase.co/rest/v1/cafe_settings
+endpoint    : https://api.sejadikopi.com/api/cafe_settings
 method      : PATCH
 payload     : {
                 "is_open": false,
@@ -67,7 +67,7 @@ response    : 200 {
 
 4. Get Total Menu Count
 -------------------------------------------------
-endpoint    : https://glpdalyzhouayztwgtkv.supabase.co/rest/v1/menu
+endpoint    : https://api.sejadikopi.com/api/menu
 method      : GET
 payload     : -
 header      : {
@@ -83,7 +83,7 @@ response    : 200 (Headers: Content-Range: 0-49/50)
 
 5. Get Total Kategori Count
 -------------------------------------------------
-endpoint    : https://glpdalyzhouayztwgtkv.supabase.co/rest/v1/kategori_menu
+endpoint    : https://api.sejadikopi.com/api/kategori_menu
 method      : GET
 payload     : -
 header      : {
@@ -99,7 +99,7 @@ response    : 200 (Headers: Content-Range: 0-9/10)
 
 6. Get Today's Orders Count
 -------------------------------------------------
-endpoint    : https://glpdalyzhouayztwgtkv.supabase.co/rest/v1/pesanan
+endpoint    : https://api.sejadikopi.com/api/pesanan
 method      : GET
 payload     : -
 header      : {
@@ -115,7 +115,7 @@ response    : 200 (Headers: Content-Range: 0-29/30)
 
 7. Get Orders Count by Status
 -------------------------------------------------
-endpoint    : https://glpdalyzhouayztwgtkv.supabase.co/rest/v1/pesanan
+endpoint    : https://api.sejadikopi.com/api/pesanan
 method      : GET
 payload     : -
 header      : {
@@ -132,7 +132,7 @@ response    : 200 (Headers: Content-Range: 0-4/5)
 
 8. Get Active Orders with Details (Pending & Diproses)
 -------------------------------------------------
-endpoint    : https://glpdalyzhouayztwgtkv.supabase.co/rest/v1/pesanan
+endpoint    : https://api.sejadikopi.com/api/pesanan
 method      : GET
 payload     : -
 header      : {
@@ -186,7 +186,7 @@ response    : {
 11. Discount Codes
 -------------------------------------------------
 ### Get All Discount Codes
-endpoint    : https://glpdalyzhouayztwgtkv.supabase.co/rest/v1/discount-codes
+endpoint    : https://api.sejadikopi.com/api/discount-codes
 method      : GET
 payload     : -
 header      : {
@@ -217,7 +217,7 @@ response    : 200 {
               500 { "error": "Internal Server Error" }
 
 ### Get Discount Code by ID
-endpoint    : https://glpdalyzhouayztwgtkv.supabase.co/rest/v1/discount-codes/{id}
+endpoint    : https://api.sejadikopi.com/api/discount-codes/{id}
 method      : GET
 payload     : -
 header      : {
@@ -243,19 +243,636 @@ response    : 200 {
               500 { "error": "Internal Server Error" }
 
 ### Create New Discount Code
-endpoint    : https://glpdalyzhouayztwgtkv.supabase.co/rest/v1/discount-codes
+endpoint    : https://api.sejadikopi.com/api/discount-codes
 method      : POST
 payload     : {
                 "code": "NEWDISCOUNT",
                 "type": "fixed",
+
+## PemasukanLain Endpoints
+Route prefix: `/pemasukan-lains`
+
+### Create New PemasukanLain
+endpoint    : https://api.sejadikopi.com/api/pemasukan-lains
+method      : POST
+payload     : {
+                "kategori": "penjualan_minuman",
+                "deskripsi": "Penjualan kopi latte hari ini",
+                "jumlah": 150000.00,
+                "tanggal": "2025-11-29T08:30:00Z",
+                "created_by": 1,
+                "bukti_url": "https://storage.sejadikopi.com/bukti-123.pdf"
+              }
+header      : {
+                "apikey": "[API_KEY]",
+                "Authorization": "Bearer [API_KEY]",
+                "Content-Type": "application/json"
+              }
+response    : 201 {
+                "id": 1,
+                "kategori": "penjualan_minuman",
+                "deskripsi": "Penjualan kopi latte hari ini",
+                "jumlah": 150000.00,
+                "tanggal": "2025-11-29T08:30:00Z",
+                "created_by": 1,
+                "bukti_url": "https://storage.sejadikopi.com/bukti-123.pdf",
+                "created_at": "2025-11-29T08:30:00Z",
+                "updated_at": "2025-11-29T08:30:00Z"
+              }
+              422 { "errors": { "kategori": ["The kategori field is required."] } }
+              500 { "error": "Internal Server Error"}
+
+### Get All PemasukanLain Entries
+endpoint    : https://api.sejadikopi.com/api/pemasukan-lains
+method      : GET
+header      : {
+                "apikey": "[API_KEY]",
+                "Authorization": "Bearer [API_KEY]",
+                "Content-Type": "application/json"
+              }
+query_params: ?kategori=eq.penjualan_minuman&tanggal=gte.2025-11-01&order=created_at.desc
+response    : 200 [{
+                "id": 1,
+                "kategori": "penjualan_minuman",
+                "deskripsi": "Penjualan kopi latte hari ini",
+                "jumlah": 150000.00,
+                "tanggal": "2025-11-29T08:30:00Z",
+                "created_by": 1,
+                "bukti_url": "https://storage.sejadikopi.com/bukti-123.pdf",
+                "created_at": "2025-11-29T08:30:00Z",
+                "updated_at": "2025-11-29T08:30:00Z"
+              }]
+              500 { "error": "Internal Server Error"}
+
+### Get PemasukanLain by ID
+endpoint    : https://api.sejadikopi.com/api/pemasukan-lains/{id}
+method      : GET
+header      : {
+                "apikey": "[API_KEY]",
+                "Authorization": "Bearer [API_KEY]",
+                "Content-Type": "application/json"
+              }
+response    : 200 {
+                "id": 1,
+                "kategori": "penjualan_minuman",
+                "deskripsi": "Penjualan kopi latte hari ini",
+                "jumlah": 150000.00,
+                "tanggal": "2025-11-29T08:30:00Z",
+                "created_by": 1,
+                "bukti_url": "https://storage.sejadikopi.com/bukti-123.pdf",
+                "created_at": "2025-11-29T08:30:00Z",
+                "updated_at": "2025-11-29T08:30:00Z"
+              }
+              404 { "error": "PemasukanLain not found" }
+              500 { "error": "Internal Server Error"}
+
+### Update PemasukanLain by ID
+endpoint    : https://api.sejadikopi.com/api/pemasukan-lains/{id}
+method      : PATCH
+payload     : {
+                "jumlah": 160000.00
+              }
+header      : {
+                "apikey": "[API_KEY]",
+                "Authorization": "Bearer [API_KEY]",
+                "Content-Type": "application/json"
+              }
+response    : 200 {
+                "id": 1,
+                "kategori": "penjualan_minuman",
+                "deskripsi": "Penjualan kopi latte hari ini",
+                "jumlah": 160000.00,
+                "tanggal": "2025-11-29T08:30:00Z",
+                "created_by": 1,
+                "bukti_url": "https://storage.sejadikopi.com/bukti-123.pdf",
+                "created_at": "2025-11-29T08:30:00Z",
+                "updated_at": "2025-11-29T08:35:00Z"
+              }
+              404 { "error": "PemasukanLain not found" }
+              422 { "errors": { "jumlah": ["The jumlah field must be a number."] } }
+              500 { "error": "Internal Server Error"}
+
+### Delete PemasukanLain by ID
+endpoint    : https://api.sejadikopi.com/api/pemasukan-lains/{id}
+method      : DELETE
+header      : {
+                "apikey": "[API_KEY]",
+                "Authorization": "Bearer [API_KEY]",
+                "Content-Type": "application/json"
+              }
+response    : 204 (No Content)
+              404 { "error": "PemasukanLain not found" }
+              500 { "error": "Internal Server Error"}
+
                 "value": 5000,
-                "is_active": true,
+                  "is_active": true,
+
+## Pengeluaran Endpoints
+Route prefix: `/pengeluarans`
+
+### Create New Pengeluaran
+endpoint    : https://api.sejadikopi.com/api/pengeluarans
+method      : POST
+payload     : {
+                "kategori": "belanja_bahan_baku",
+                "deskripsi": "Pembelian biji kopi arabika",
+                "jumlah": 500000.00,
+                "tanggal": "2025-11-29T09:00:00Z",
+                "created_by": 1,
+                "bukti_url": "https://storage.sejadikopi.com/bukti-pengeluaran-1.pdf",
+                "foto_url": "https://storage.sejadikopi.com/foto-pengeluaran-1.jpg"
+              }
+header      : {
+                "apikey": "[API_KEY]",
+                "Authorization": "Bearer [API_KEY]",
+                "Content-Type": "application/json"
+              }
+response    : 201 {
+                "id": 1,
+                "kategori": "belanja_bahan_baku",
+                "deskripsi": "Pembelian biji kopi arabika",
+                "jumlah": 500000.00,
+                "tanggal": "2025-11-29T09:00:00Z",
+                "created_by": 1,
+                "bukti_url": "https://storage.sejadikopi.com/bukti-pengeluaran-1.pdf",
+                "foto_url": "https://storage.sejadikopi.com/foto-pengeluaran-1.jpg",
+                "created_at": "2025-11-29T09:00:00Z",
+                "updated_at": "2025-11-29T09:00:00Z"
+              }
+              422 { "errors": { "kategori": ["The kategori field is required."] } }
+              500 { "error": "Internal Server Error"}
+
+### Get All Pengeluaran Entries
+endpoint    : https://api.sejadikopi.com/api/pengeluarans
+method      : GET
+header      : {
+                "apikey": "[API_KEY]",
+                "Authorization": "Bearer [API_KEY]",
+                "Content-Type": "application/json"
+              }
+query_params: ?kategori=eq.belanja_bahan_baku&jumlah=gte.100000&tanggal=lte.2025-12-31&order=created_at.desc
+response    : 200 [{
+                "id": 1,
+                "kategori": "belanja_bahan_baku",
+                "deskripsi": "Pembelian biji kopi arabika",
+                "jumlah": 500000.00,
+                "tanggal": "2025-11-29T09:00:00Z",
+                "created_by": 1,
+                "bukti_url": "https://storage.sejadikopi.com/bukti-pengeluaran-1.pdf",
+                "foto_url": "https://storage.sejadikopi.com/foto-pengeluaran-1.jpg",
+                "created_at": "2025-11-29T09:00:00Z",
+                "updated_at": "2025-11-29T09:00:00Z"
+              }]
+              500 { "error": "Internal Server Error"}
+
+### Get Pengeluaran by ID
+endpoint    : https://api.sejadikopi.com/api/pengeluarans/{id}
+method      : GET
+header      : {
+                "apikey": "[API_KEY]",
+                "Authorization": "Bearer [API_KEY]",
+                "Content-Type": "application/json"
+              }
+response    : 200 {
+                "id": 1,
+                "kategori": "belanja_bahan_baku",
+                "deskripsi": "Pembelian biji kopi arabika",
+                "jumlah": 500000.00,
+                "tanggal": "2025-11-29T09:00:00Z",
+                "created_by": 1,
+                "bukti_url": "https://storage.sejadikopi.com/bukti-pengeluaran-1.pdf",
+                "foto_url": "https://storage.sejadikopi.com/foto-pengeluaran-1.jpg",
+                "created_at": "2025-11-29T09:00:00Z",
+                "updated_at": "2025-11-29T09:00:00Z"
+              }
+              404 { "error": "Pengeluaran not found" }
+              500 { "error": "Internal Server Error"}
+
+### Update Pengeluaran by ID
+endpoint    : https://api.sejadikopi.com/api/pengeluarans/{id}
+method      : PATCH
+payload     : {
+                "jumlah": 550000.00
+              }
+header      : {
+                "apikey": "[API_KEY]",
+                "Authorization": "Bearer [API_KEY]",
+                "Content-Type": "application/json"
+              }
+response    : 200 {
+                "id": 1,
+                "kategori": "belanja_bahan_baku",
+                "deskripsi": "Pembelian biji kopi arabika",
+                "jumlah": 550000.00,
+                "tanggal": "2025-11-29T09:00:00Z",
+                "created_by": 1,
+                "bukti_url": "https://storage.sejadikopi.com/bukti-pengeluaran-1.pdf",
+                "foto_url": "https://storage.sejadikopi.com/foto-pengeluaran-1.jpg",
+                "created_at": "2025-11-29T09:00:00Z",
+                "updated_at": "2025-11-29T09:05:00Z"
+              }
+              404 { "error": "Pengeluaran not found" }
+              422 { "errors": { "jumlah": ["The jumlah field must be a number."] } }
+              500 { "error": "Internal Server Error"}
+
+### Delete Pengeluaran by ID
+endpoint    : https://api.sejadikopi.com/api/pengeluarans/{id}
+method      : DELETE
+header      : {
+                "apikey": "[API_KEY]",
+                "Authorization": "Bearer [API_KEY]",
+                "Content-Type": "application/json"
+              }
+response    : 204 (No Content)
+              404 { "error": "Pengeluaran not found" }
+              500 { "error": "Internal Server Error"}
                 "min_amount": 20000,
-                "max_discount_amount": null,
+                  "max_discount_amount": null,
+
+## Pesanan Endpoints
+Route prefix: `/pesanans`
+
+### Create New Pesanan
+endpoint    : https://api.sejadikopi.com/api/pesanans
+method      : POST
+payload     : {
+                "no_meja": "10",
+                "status": "pending",
+                "total": 75000.00,
+                "note": "Tidak terlalu manis",
+                "location_type": "dine_in",
+                "metode_pembayaran": "qris",
+                "bank_qris": "bca",
+                "is_final": false
+              }
+header      : {
+                "apikey": "[API_KEY]",
+                "Authorization": "Bearer [API_KEY]",
+                "Content-Type": "application/json"
+              }
+response    : 201 {
+                "id": 1,
+                "no_meja": "10",
+                "status": "pending",
+                "total": 75000.00,
+                "note": "Tidak terlalu manis",
+                "cancellation_reason": null,
+                "cancelled_at": null,
+                "location_type": "dine_in",
+                "pickup_time": null,
+                "discount_code": null,
+                "discount_amount": 0,
+                "total_after_discount": 75000,
+                "processed_at": null,
+                "completed_at": null,
+                "is_hidden": false,
+                "archived_at": null,
+                "location_area": null,
+                "metode_pembayaran": "qris",
+                "bank_qris": "bca",
+                "is_final": false,
+                "created_at": "2025-11-29T09:30:00Z",
+                "updated_at": "2025-11-29T09:30:00Z"
+              }
+              422 { "errors": { "no_meja": ["The no meja field is required."] } }
+              500 { "error": "Internal Server Error"}
+
+### Get All Pesanan Entries
+endpoint    : https://api.sejadikopi.com/api/pesanans
+method      : GET
+header      : {
+                "apikey": "[API_KEY]",
+                "Authorization": "Bearer [API_KEY]",
+                "Content-Type": "application/json"
+              }
+query_params: ?status=eq.pending&location_type=eq.dine_in&total=gte.50000&order=created_at.desc
+response    : 200 [{
+                "id": 1,
+                "no_meja": "10",
+                "status": "pending",
+                "total": 75000.00,
+                "note": "Tidak terlalu manis",
+                "cancellation_reason": null,
+                "cancelled_at": null,
+                "location_type": "dine_in",
+                "pickup_time": null,
+                "discount_code": null,
+                "discount_amount": 0,
+                "total_after_discount": 75000,
+                "processed_at": null,
+                "completed_at": null,
+                "is_hidden": false,
+                "archived_at": null,
+                "location_area": null,
+                "metode_pembayaran": "qris",
+                "bank_qris": "bca",
+                "is_final": false,
+                "created_at": "2025-11-29T09:30:00Z",
+                "updated_at": "2025-11-29T09:30:00Z"
+              }]
+              500 { "error": "Internal Server Error"}
+
+### Get Pesanan by ID
+endpoint    : https://api.sejadikopi.com/api/pesanans/{id}
+method      : GET
+header      : {
+                "apikey": "[API_KEY]",
+                "Authorization": "Bearer [API_KEY]",
+                "Content-Type": "application/json"
+              }
+response    : 200 {
+                "id": 1,
+                "no_meja": "10",
+                "status": "pending",
+                "total": 75000.00,
+                "note": "Tidak terlalu manis",
+                "cancellation_reason": null,
+                "cancelled_at": null,
+                "location_type": "dine_in",
+                "pickup_time": null,
+                "discount_code": null,
+                "discount_amount": 0,
+                "total_after_discount": 75000,
+                "processed_at": null,
+                "completed_at": null,
+                "is_hidden": false,
+                "archived_at": null,
+                "location_area": null,
+                "metode_pembayaran": "qris",
+                "bank_qris": "bca",
+                "is_final": false,
+                "created_at": "2025-11-29T09:30:00Z",
+                "updated_at": "2025-11-29T09:30:00Z"
+              }
+              404 { "error": "Pesanan not found" }
+              500 { "error": "Internal Server Error"}
+
+### Update Pesanan by ID
+endpoint    : https://api.sejadikopi.com/api/pesanans/{id}
+method      : PATCH
+payload     : {
+                "status": "diproses",
+                "processed_at": "2025-11-29T09:35:00Z"
+              }
+header      : {
+                "apikey": "[API_KEY]",
+                "Authorization": "Bearer [API_KEY]",
+                "Content-Type": "application/json"
+              }
+response    : 200 {
+                "id": 1,
+                "no_meja": "10",
+                "status": "diproses",
+                "total": 75000.00,
+                "note": "Tidak terlalu manis",
+                "cancellation_reason": null,
+                "cancelled_at": null,
+                "location_type": "dine_in",
+                "pickup_time": null,
+                "discount_code": null,
+                "discount_amount": 0,
+                "total_after_discount": 75000,
+                "processed_at": "2025-11-29T09:35:00Z",
+                "completed_at": null,
+                "is_hidden": false,
+                "archived_at": null,
+                "location_area": null,
+                "metode_pembayaran": "qris",
+                "bank_qris": "bca",
+                "is_final": false,
+                "created_at": "2025-11-29T09:30:00Z",
+                "updated_at": "2025-11-29T09:35:00Z"
+              }
+              404 { "error": "Pesanan not found" }
+              422 { "errors": { "status": ["The status field is invalid."] } }
+              500 { "error": "Internal Server Error"}
+
+### Delete Pesanan by ID
+endpoint    : https://api.sejadikopi.com/api/pesanans/{id}
+method      : DELETE
+header      : {
+                "apikey": "[API_KEY]",
+                "Authorization": "Bearer [API_KEY]",
+                "Content-Type": "application/json"
+              }
+response    : 204 (No Content)
+              404 { "error": "Pesanan not found" }
+              500 { "error": "Internal Server Error"}
                 "valid_from": "2025-02-01T00:00:00Z",
-                "valid_to": "2025-02-28T23:59:59Z",
+                  "valid_to": "2025-02-28T23:59:59Z",
+
+## Struk Endpoints
+Route prefix: `/struks`
+
+### Create New Struk
+endpoint    : https://api.sejadikopi.com/api/struks
+method      : POST
+payload     : {
+                "pesanan_id": 1,
+                "kasir_id": 1,
+                "total": 75000.00,
+                "dibayar": 80000.00,
+                "kembalian": 5000.00
+              }
+header      : {
+                "apikey": "[API_KEY]",
+                "Authorization": "Bearer [API_KEY]",
+                "Content-Type": "application/json"
+              }
+response    : 201 {
+                "id": 1,
+                "pesanan_id": 1,
+                "kasir_id": 1,
+                "total": 75000.00,
+                "dibayar": 80000.00,
+                "kembalian": 5000.00,
+                "created_at": "2025-11-29T10:00:00Z",
+                "updated_at": "2025-11-29T10:00:00Z"
+              }
+              422 { "errors": { "pesanan_id": ["The pesanan id field is required."] } }
+              500 { "error": "Internal Server Error"}
+
+### Get All Struk Entries
+endpoint    : https://api.sejadikopi.com/api/struks
+method      : GET
+header      : {
+                "apikey": "[API_KEY]",
+                "Authorization": "Bearer [API_KEY]",
+                "Content-Type": "application/json"
+              }
+query_params: ?kasir_id=eq.1&total=gte.50000&order=created_at.desc
+response    : 200 [{
+                "id": 1,
+                "pesanan_id": 1,
+                "kasir_id": 1,
+                "total": 75000.00,
+                "dibayar": 80000.00,
+                "kembalian": 5000.00,
+                "created_at": "2025-11-29T10:00:00Z",
+                "updated_at": "2025-11-29T10:00:00Z"
+              }]
+              500 { "error": "Internal Server Error"}
+
+### Get Struk by ID
+endpoint    : https://api.sejadikopi.com/api/struks/{id}
+method      : GET
+header      : {
+                "apikey": "[API_KEY]",
+                "Authorization": "Bearer [API_KEY]",
+                "Content-Type": "application/json"
+              }
+response    : 200 {
+                "id": 1,
+                "pesanan_id": 1,
+                "kasir_id": 1,
+                "total": 75000.00,
+                "dibayar": 80000.00,
+                "kembalian": 5000.00,
+                "created_at": "2025-11-29T10:00:00Z",
+                "updated_at": "2025-11-29T10:00:00Z"
+              }
+              404 { "error": "Struk not found" }
+              500 { "error": "Internal Server Error"}
+
+### Update Struk by ID
+endpoint    : https://api.sejadikopi.com/api/struks/{id}
+method      : PATCH
+payload     : {
+                "dibayar": 85000.00,
+                "kembalian": 10000.00
+              }
+header      : {
+                "apikey": "[API_KEY]",
+                "Authorization": "Bearer [API_KEY]",
+                "Content-Type": "application/json"
+              }
+response    : 200 {
+                "id": 1,
+                "pesanan_id": 1,
+                "kasir_id": 1,
+                "total": 75000.00,
+                "dibayar": 85000.00,
+                "kembalian": 10000.00,
+                "created_at": "2025-11-29T10:00:00Z",
+                "updated_at": "2025-11-29T10:05:00Z"
+              }
+              404 { "error": "Struk not found" }
+              422 { "errors": { "dibayar": ["The dibayar field must be a number."] } }
+              500 { "error": "Internal Server Error"}
+
+### Delete Struk by ID
+endpoint    : https://api.sejadikopi.com/api/struks/{id}
+method      : DELETE
+header      : {
+                "apikey": "[API_KEY]",
+                "Authorization": "Bearer [API_KEY]",
+                "Content-Type": "application/json"
+              }
+response    : 204 (No Content)
+              404 { "error": "Struk not found" }
+              500 { "error": "Internal Server Error"}
                 "usage_limit": 50,
-                "used_count": 0
+                  "used_count": 0
+
+## User Endpoints
+Route prefix: `/users`
+
+### Create New User
+endpoint    : https://api.sejadikopi.com/api/users
+method      : POST
+payload     : {
+                "name": "John Doe",
+                "email": "john.doe@example.com",
+                "password": "password123"
+              }
+header      : {
+                "apikey": "[API_KEY]",
+                "Authorization": "Bearer [API_KEY]",
+                "Content-Type": "application/json"
+              }
+response    : 201 {
+                "id": 1,
+                "name": "John Doe",
+                "email": "john.doe@example.com",
+                "email_verified_at": null,
+                "created_at": "2025-11-29T10:30:00Z",
+                "updated_at": "2025-11-29T10:30:00Z"
+              }
+              422 { "errors": { "email": ["The email has already been taken."] } }
+              500 { "error": "Internal Server Error"}
+
+### Get All User Entries
+endpoint    : https://api.sejadikopi.com/api/users
+method      : GET
+header      : {
+                "apikey": "[API_KEY]",
+                "Authorization": "Bearer [API_KEY]",
+                "Content-Type": "application/json"
+              }
+query_params: ?name=ilike.*john*&email=eq.john.doe@example.com&order=created_at.desc
+response    : 200 [{
+                "id": 1,
+                "name": "John Doe",
+                "email": "john.doe@example.com",
+                "email_verified_at": null,
+                "created_at": "2025-11-29T10:30:00Z",
+                "updated_at": "2025-11-29T10:30:00Z"
+              }]
+              500 { "error": "Internal Server Error"}
+
+### Get User by ID
+endpoint    : https://api.sejadikopi.com/api/users/{id}
+method      : GET
+header      : {
+                "apikey": "[API_KEY]",
+                "Authorization": "Bearer [API_KEY]",
+                "Content-Type": "application/json"
+              }
+response    : 200 {
+                "id": 1,
+                "name": "John Doe",
+                "email": "john.doe@example.com",
+                "email_verified_at": null,
+                "created_at": "2025-11-29T10:30:00Z",
+                "updated_at": "2025-11-29T10:30:00Z"
+              }
+              404 { "error": "User not found" }
+              500 { "error": "Internal Server Error"}
+
+### Update User by ID
+endpoint    : https://api.sejadikopi.com/api/users/{id}
+method      : PATCH
+payload     : {
+                "name": "Jane Doe"
+              }
+header      : {
+                "apikey": "[API_KEY]",
+                "Authorization": "Bearer [API_KEY]",
+                "Content-Type": "application/json"
+              }
+response    : 200 {
+                "id": 1,
+                "name": "Jane Doe",
+                "email": "john.doe@example.com",
+                "email_verified_at": null,
+                "created_at": "2025-11-29T10:30:00Z",
+                "updated_at": "2025-11-29T10:35:00Z"
+              }
+              404 { "error": "User not found" }
+              422 { "errors": { "name": ["The name field is required."] } }
+              500 { "error": "Internal Server Error"}
+
+### Delete User by ID
+endpoint    : https://api.sejadikopi.com/api/users/{id}
+method      : DELETE
+header      : {
+                "apikey": "[API_KEY]",
+                "Authorization": "Bearer [API_KEY]",
+                "Content-Type": "application/json"
+              }
+response    : 204 (No Content)
+              404 { "error": "User not found" }
+              500 { "error": "Internal Server Error"}
               }
 header      : {
                 "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -281,7 +898,7 @@ response    : 201 {
               500 { "error": "Internal Server Error" }
 
 ### Update Discount Code
-endpoint    : https://glpdalyzhouayztwgtkv.supabase.co/rest/v1/discount-codes/{id}
+endpoint    : https://api.sejadikopi.com/api/discount-codes/{id}
 method      : PUT
 payload     : {
                 "is_active": false,
@@ -312,7 +929,7 @@ response    : 200 {
               500 { "error": "Internal Server Error" }
 
 ### Delete Discount Code
-endpoint    : https://glpdalyzhouayztwgtkv.supabase.co/rest/v1/discount-codes/{id}
+endpoint    : https://api.sejadikopi.com/api/discount-codes/{id}
 method      : DELETE
 payload     : -
 header      : {
@@ -329,7 +946,7 @@ response    : 204 { "message": "Discount Code deleted successfully" }
 12. Export Histories
 -------------------------------------------------
 ### Get All Export Histories
-endpoint    : https://glpdalyzhouayztwgtkv.supabase.co/rest/v1/export-histories
+endpoint    : https://api.sejadikopi.com/api/export-histories
 method      : GET
 payload     : -
 header      : {
@@ -355,7 +972,7 @@ response    : 200 {
               500 { "error": "Internal Server Error" }
 
 ### Get Export History by ID
-endpoint    : https://glpdalyzhouayztwgtkv.supabase.co/rest/v1/export-histories/{id}
+endpoint    : https://api.sejadikopi.com/api/export-histories/{id}
 method      : GET
 payload     : -
 header      : {
@@ -376,7 +993,7 @@ response    : 200 {
               500 { "error": "Internal Server Error" }
 
 ### Create New Export History
-endpoint    : https://glpdalyzhouayztwgtkv.supabase.co/rest/v1/export-histories
+endpoint    : https://api.sejadikopi.com/api/export-histories
 method      : POST
 payload     : {
                 "export_type": "menu",
@@ -404,7 +1021,7 @@ response    : 201 {
               500 { "error": "Internal Server Error" }
 
 ### Update Export History
-endpoint    : https://glpdalyzhouayztwgtkv.supabase.co/rest/v1/export-histories/{id}
+endpoint    : https://api.sejadikopi.com/api/export-histories/{id}
 method      : PUT
 payload     : {
                 "status": "completed",
@@ -430,7 +1047,7 @@ response    : 200 {
               500 { "error": "Internal Server Error" }
 
 ### Delete Export History
-endpoint    : https://glpdalyzhouayztwgtkv.supabase.co/rest/v1/export-histories/{id}
+endpoint    : https://api.sejadikopi.com/api/export-histories/{id}
 method      : DELETE
 payload     : -
 header      : {
@@ -446,7 +1063,7 @@ response    : 204 { "message": "Export History deleted successfully" }
 13. History Archives
 -------------------------------------------------
 ### Get All History Archives
-endpoint    : https://glpdalyzhouayztwgtkv.supabase.co/rest/v1/history-archives
+endpoint    : https://api.sejadikopi.com/api/history-archives
 method      : GET
 payload     : -
 header      : {
@@ -470,7 +1087,7 @@ response    : 200 {
               500 { "error": "Internal Server Error" }
 
 ### Get History Archive by ID
-endpoint    : https://glpdalyzhouayztwgtkv.supabase.co/rest/v1/history-archives/{id}
+endpoint    : https://api.sejadikopi.com/api/history-archives/{id}
 method      : GET
 payload     : -
 header      : {
@@ -489,7 +1106,7 @@ response    : 200 {
               500 { "error": "Internal Server Error" }
 
 ### Create New History Archive
-endpoint    : https://glpdalyzhouayztwgtkv.supabase.co/rest/v1/history-archives
+endpoint    : https://api.sejadikopi.com/api/history-archives
 method      : POST
 payload     : {
                 "archive_type": "menu",
@@ -522,7 +1139,7 @@ response    : 201 {
 15. Menu Allowed Additionals
 -------------------------------------------------
 ### Get All Menu Allowed Additionals
-endpoint    : https://glpdalyzhouayztwgtkv.supabase.co/rest/v1/menu-allowed-additionals
+endpoint    : https://api.sejadikopi.com/api/menu-allowed-additionals
 method      : GET
 payload     : -
 header      : {
@@ -545,7 +1162,7 @@ response    : 200 {
               500 { "error": "Internal Server Error" }
 
 ### Get Menu Allowed Additional by ID
-endpoint    : https://glpdalyzhouayztwgtkv.supabase.co/rest/v1/menu-allowed-additionals/{id}
+endpoint    : https://api.sejadikopi.com/api/menu-allowed-additionals/{id}
 method      : GET
 payload     : -
 header      : {
@@ -563,7 +1180,7 @@ response    : 200 {
               500 { "error": "Internal Server Error" }
 
 ### Create New Menu Allowed Additional
-endpoint    : https://glpdalyzhouayztwgtkv.supabase.co/rest/v1/menu-allowed-additionals
+endpoint    : https://api.sejadikopi.com/api/menu-allowed-additionals
 method      : POST
 payload     : {
                 "menu_id": 1,
@@ -585,7 +1202,7 @@ response    : 201 {
               500 { "error": "Internal Server Error" }
 
 ### Update Menu Allowed Additional
-endpoint    : https://glpdalyzhouayztwgtkv.supabase.co/rest/v1/menu-allowed-additionals/{id}
+endpoint    : https://api.sejadikopi.com/api/menu-allowed-additionals/{id}
 method      : PUT
 payload     : {
                 "menu_id": 2
@@ -607,7 +1224,7 @@ response    : 200 {
               500 { "error": "Internal Server Error" }
 
 ### Delete Menu Allowed Additional
-endpoint    : https://glpdalyzhouayztwgtkv.supabase.co/rest/v1/menu-allowed-additionals/{id}
+endpoint    : https://api.sejadikopi.com/api/menu-allowed-additionals/{id}
 method      : DELETE
 payload     : -
 header      : {
@@ -618,7 +1235,7 @@ response    : 204 { "message": "Menu Allowed Additionals deleted successfully" }
               404 { "error": "Menu Allowed Additionals not found" }
               500 { "error": "Internal Server Error" }
 ### Get All Menu Additional Configs
-endpoint    : https://glpdalyzhouayztwgtkv.supabase.co/rest/v1/menu-additional-configs
+endpoint    : https://api.sejadikopi.com/api/menu-additional-configs
 method      : GET
 payload     : -
 header      : {
@@ -641,7 +1258,7 @@ response    : 200 {
               500 { "error": "Internal Server Error" }
 
 ### Get Menu Additional Config by ID
-endpoint    : https://glpdalyzhouayztwgtkv.supabase.co/rest/v1/menu-additional-configs/{id}
+endpoint    : https://api.sejadikopi.com/api/menu-additional-configs/{id}
 method      : GET
 payload     : -
 header      : {
@@ -659,7 +1276,7 @@ response    : 200 {
               500 { "error": "Internal Server Error" }
 
 ### Create New Menu Additional Config
-endpoint    : https://glpdalyzhouayztwgtkv.supabase.co/rest/v1/menu-additional-configs
+endpoint    : https://api.sejadikopi.com/api/menu-additional-configs
 method      : POST
 payload     : {
                 "menu_id": 1,
@@ -681,7 +1298,7 @@ response    : 201 {
               500 { "error": "Internal Server Error" }
 
 ### Update Menu Additional Config
-endpoint    : https://glpdalyzhouayztwgtkv.supabase.co/rest/v1/menu-additional-configs/{id}
+endpoint    : https://api.sejadikopi.com/api/menu-additional-configs/{id}
 method      : PUT
 payload     : {
                 "menu_id": 2
@@ -703,7 +1320,7 @@ response    : 200 {
               500 { "error": "Internal Server Error" }
 
 ### Delete Menu Additional Config
-endpoint    : https://glpdalyzhouayztwgtkv.supabase.co/rest/v1/menu-additional-configs/{id}
+endpoint    : https://api.sejadikopi.com/api/menu-additional-configs/{id}
 method      : DELETE
 payload     : -
 header      : {
@@ -718,7 +1335,7 @@ response    : 204 { "message": "Menu Additional Config deleted successfully" }
 -------------------------------------------------
 
 ### Update History Archive
-endpoint    : https://glpdalyzhouayztwgtkv.supabase.co/rest/v1/history-archives/{id}
+endpoint    : https://api.sejadikopi.com/api/history-archives/{id}
 method      : PUT
 payload     : {
                 "data": {"menu_id": 456, "menu_name": "Espresso"}
@@ -741,7 +1358,7 @@ response    : 200 {
               500 { "error": "Internal Server Error" }
 
 ### Delete History Archive
-endpoint    : https://glpdalyzhouayztwgtkv.supabase.co/rest/v1/history-archives/{id}
+endpoint    : https://api.sejadikopi.com/api/history-archives/{id}
 method      : DELETE
 payload     : -
 header      : {
@@ -771,7 +1388,7 @@ ADMIN ORDER PAGE - API DOCUMENTATION
 
 1. Fetch Active Orders
 -
-endpoint    : https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/pesanan
+endpoint    : https://api.sejadikopi.com/api/pesanan
 method      : GET
 query       : select=id,no_meja,note,status,created_at,total,updated_at,location_area,detail_pesanan(id,menu_id,jumlah,subtotal,note,varian,additionals,dimsum_additionals,additional_price,base_price,menu(id,nama,harga,kategori_id,kategori_struk))
               &status=in.(pending,diproses)
@@ -819,7 +1436,7 @@ response    : 200 [
 
 2. Update Order Status to "diproses"
 -
-endpoint    : https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/pesanan
+endpoint    : https://api.sejadikopi.com/api/pesanan
 method      : PATCH
 query       : id=eq.{order_id}
 payload     : {
@@ -836,7 +1453,7 @@ response    : 200 { "status": "success" }
 
 3. Cancel Order (Update to "batal")
 -
-endpoint    : https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/pesanan
+endpoint    : https://api.sejadikopi.com/api/pesanan
 method      : PATCH
 query       : id=eq.{order_id}
 payload     : {
@@ -856,7 +1473,7 @@ response    : 200 { "status": "success" }
 
 4. Delete Order (Update Status to "batal")
 -
-endpoint    : https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/pesanan
+endpoint    : https://api.sejadikopi.com/api/pesanan
 method      : PATCH
 query       : id=eq.{order_id}
 payload     : {
@@ -876,7 +1493,7 @@ response    : 200 { "status": "success" }
 
 5. Cancel Item (Partial Cancellation)
 -
-endpoint    : https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/detail_pesanan
+endpoint    : https://api.sejadikopi.com/api/detail_pesanan
 method      : PATCH
 query       : id=eq.{item_id}&pesanan_id=eq.{order_id}
 payload     : {
@@ -898,7 +1515,7 @@ response    : 200 { "status": "success" }
 
 6. Update Total After Item Cancellation
 -
-endpoint    : https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/pesanan
+endpoint    : https://api.sejadikopi.com/api/pesanan
 method      : PATCH
 query       : id=eq.{order_id}
 payload     : {
@@ -916,7 +1533,7 @@ response    : 200 { "status": "success" }
 
 7. Process Payment & Complete Order
 -
-endpoint    : https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/pesanan
+endpoint    : https://api.sejadikopi.com/api/pesanan
 method      : PATCH
 query       : id=eq.{order_id}
 payload     : {
@@ -940,7 +1557,7 @@ response    : 200 { "status": "success" }
 
 8. Fetch Discount Codes
 -
-endpoint    : https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/discount_codes
+endpoint    : https://api.sejadikopi.com/api/discount_codes
 method      : GET
 query       : select=code,type,value,description,is_active
               &is_active=eq.true
@@ -971,7 +1588,7 @@ response    : 200 [
 
 9. Fetch Additional Menu
 -
-endpoint    : https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/additionals
+endpoint    : https://api.sejadikopi.com/api/additionals
 method      : GET
 query       : select=id,nama,harga
               &order=nama.asc
@@ -997,7 +1614,7 @@ response    : 200 [
 
 10. Fetch Store Status
 -
-endpoint    : https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/cafe_settings
+endpoint    : https://api.sejadikopi.com/api/cafe_settings
 method      : GET
 query       : select=is_open
               &limit=1
@@ -1014,7 +1631,7 @@ response    : 200 {
 
 11. Insert Default Store Status (If Not Exists)
 -
-endpoint    : https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/cafe_settings
+endpoint    : https://api.sejadikopi.com/api/cafe_settings
 method      : POST
 query       : -
 payload     : [
@@ -1033,7 +1650,7 @@ response    : 201 { "status": "success" }
 
 12. Update Store Status
 -
-endpoint    : https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/cafe_settings
+endpoint    : https://api.sejadikopi.com/api/cafe_settings
 method      : PATCH
 query       : id=eq.{cafe_settings_id}
 payload     : {
@@ -1086,7 +1703,7 @@ response    : 200 {
 
 15. Fetch Logo Sejadi Kopi (Storage)
 -
-endpoint    : https://wqsizttvrwwddquftpnq.supabase.co/storage/v1/object/public/assets/Logo/logo_sejadi.png
+endpoint    : https://api.sejadikopi.com/api/object/public/assets/Logo/logo_sejadi.png
 method      : GET
 payload     : -
 header      : -
@@ -1095,7 +1712,7 @@ response    : 200 (Binary Image Data)
 
 16. Fetch Bank Logo BCA (Storage)
 -
-endpoint    : https://wqsizttvrwwddquftpnq.supabase.co/storage/v1/object/public/assets/Logo/BCA-Logo-Bank-Central-Asia.png
+endpoint    : https://api.sejadikopi.com/api/object/public/assets/Logo/BCA-Logo-Bank-Central-Asia.png
 method      : GET
 payload     : -
 header      : -
@@ -1104,7 +1721,7 @@ response    : 200 (Binary Image Data)
 
 17. Fetch Bank Logo BRI (Storage)
 -
-endpoint    : https://wqsizttvrwwddquftpnq.supabase.co/storage/v1/object/public/assets/Logo/bri-logo-png_seeklogo-457200.png
+endpoint    : https://api.sejadikopi.com/api/object/public/assets/Logo/bri-logo-png_seeklogo-457200.png
 method      : GET
 payload     : -
 header      : -
@@ -1113,7 +1730,7 @@ response    : 200 (Binary Image Data)
 
 18. Fetch Bank Logo BSI (Storage)
 -
-endpoint    : https://wqsizttvrwwddquftpnq.supabase.co/storage/v1/object/public/assets/Logo/bank-syariah-indonesia-logo-png_seeklogo-400984.png
+endpoint    : https://api.sejadikopi.com/api/object/public/assets/Logo/bank-syariah-indonesia-logo-png_seeklogo-400984.png
 method      : GET
 payload     : -
 header      : -
@@ -1122,7 +1739,7 @@ response    : 200 (Binary Image Data)
 
 19. Fetch Notification Sound (Storage)
 -
-endpoint    : https://wqsizttvrwwddquftpnq.supabase.co/storage/v1/object/public/assets/sounds/notif.mp3
+endpoint    : https://api.sejadikopi.com/api/object/public/assets/sounds/notif.mp3
 method      : GET
 payload     : -
 header      : -
@@ -1171,7 +1788,7 @@ AdminHistory.vue
 ADMIN HISTORY PAGE - API DOCUMENTATION
 =================================================
 1. Fetch All Histories (Completed & Cancelled Orders)
-endpoint    : https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/pesanan
+endpoint    : https://api.sejadikopi.com/api/pesanan
 method      : GET
 params      : select=id,no_meja,note,status,created_at,updated_at,total,cancellation_reason,cancelled_at,location_area,discount_code,discount_amount,total_after_discount,metode_pembayaran,bank_qris,detail_pesanan(id,menu_id,jumlah,subtotal,note,varian,additionals,dimsum_additionals,additional_price,menu(id,nama,harga,kategori_id))
               &status=in.(selesai,batal)
@@ -1224,7 +1841,7 @@ response    : 200 [
 
 2. Fetch Cancelled Items
 
-endpoint    : https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/cancelled_items
+endpoint    : https://api.sejadikopi.com/api/cancelled_items
 method      : GET
 params      : select=*
               &pesanan_id=in.(1,2,3,...)
@@ -1253,7 +1870,7 @@ response    : 200 [
 
 3. Check Cafe Status (Store Open/Close)
 
-endpoint    : https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/cafe_settings
+endpoint    : https://api.sejadikopi.com/api/cafe_settings
 method      : GET
 params      : select=is_open
               &limit=1
@@ -1269,7 +1886,7 @@ response    : 200 {
 
 4. Create Initial Cafe Settings (If Not Exists)
 
-endpoint    : https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/cafe_settings
+endpoint    : https://api.sejadikopi.com/api/cafe_settings
 method      : POST
 payload     : {
                 "is_open": true
@@ -1289,7 +1906,7 @@ response    : 201 {
 
 5. Check Existing Cafe Settings
 
-endpoint    : https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/cafe_settings
+endpoint    : https://api.sejadikopi.com/api/cafe_settings
 method      : GET
 params      : select=id
               &limit=1
@@ -1305,7 +1922,7 @@ response    : 200 {
 
 6. Update Cafe Status (Open/Close Store)
 
-endpoint    : https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/cafe_settings
+endpoint    : https://api.sejadikopi.com/api/cafe_settings
 method      : PATCH
 params      : id=eq.1
 payload     : {
@@ -1335,7 +1952,7 @@ AdminPembukuan.vue
     {
       "no": 1,
       "name": "Fetch Completed Transactions for Financial Summary",
-      "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/pesanan",
+      "endpoint": "https://api.sejadikopi.com/api/pesanan",
       "method": "GET",
       "params": "select=total,created_at,detail_pesanan(subtotal,jumlah,menu(id,nama,kategori_id,harga,kategori_menu(id,nama)))&status=eq.selesai&created_at=gte.{start_date}T00:00:00&created_at=lte.{end_date}T23:59:59",
       "headers": {
@@ -1376,7 +1993,7 @@ AdminPembukuan.vue
     {
       "no": 2,
       "name": "Fetch Expenses for Financial Summary",
-      "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/pengeluaran",
+      "endpoint": "https://api.sejadikopi.com/api/pengeluaran",
       "method": "GET",
       "params": "select=jumlah&tanggal=gte.{start_date}&tanggal=lte.{end_date}",
       "headers": {
@@ -1400,7 +2017,7 @@ AdminPembukuan.vue
     {
       "no": 3,
       "name": "Fetch Previous Period Revenue (for Growth Calculation)",
-      "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/pesanan",
+      "endpoint": "https://api.sejadikopi.com/api/pesanan",
       "method": "GET",
       "params": "select=total&status=eq.selesai&created_at=gte.{prev_start_date}&created_at=lte.{prev_end_date}T23:59:59",
       "headers": {
@@ -1424,7 +2041,7 @@ AdminPembukuan.vue
     {
       "no": 4,
       "name": "Fetch Previous Period Expenses (for Reduction Calculation)",
-      "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/pengeluaran",
+      "endpoint": "https://api.sejadikopi.com/api/pengeluaran",
       "method": "GET",
       "params": "select=jumlah&tanggal=gte.{prev_start_date}&tanggal=lte.{prev_end_date}",
       "headers": {
@@ -1448,7 +2065,7 @@ AdminPembukuan.vue
     {
       "no": 5,
       "name": "Fetch Transactions with Pagination",
-      "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/pesanan",
+      "endpoint": "https://api.sejadikopi.com/api/pesanan",
       "method": "GET",
       "params": "select=id,no_meja,total,status,created_at,updated_at,detail_pesanan(id,menu_id,jumlah,subtotal,menu(nama,harga))&status=eq.selesai&order=created_at.desc&created_at=gte.{start_date}T00:00:00&created_at=lte.{end_date}T23:59:59",
       "headers": {
@@ -1491,7 +2108,7 @@ AdminPembukuan.vue
     {
       "no": 6,
       "name": "Fetch All Expenses",
-      "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/pengeluaran",
+      "endpoint": "https://api.sejadikopi.com/api/pengeluaran",
       "method": "GET",
       "params": "select=*&order=created_at.desc&tanggal=gte.{start_date}&tanggal=lte.{end_date}",
       "headers": {
@@ -1507,7 +2124,7 @@ AdminPembukuan.vue
             "jumlah": 150000,
             "tanggal": "2024-01-01",
             "created_at": "2024-01-01T10:00:00Z",
-            "foto_url": "https://wqsizttvrwwddquftpnq.supabase.co/storage/v1/object/public/..."
+            "foto_url": "https://api.sejadikopi.com/api/object/public/..."
           }
         ],
         "400": {
@@ -1521,7 +2138,7 @@ AdminPembukuan.vue
     {
       "no": 7,
       "name": "Insert New Expense",
-      "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/pengeluaran",
+      "endpoint": "https://api.sejadikopi.com/api/pengeluaran",
       "method": "POST",
       "payload": {
         "deskripsi": "Beli bahan kopi",
@@ -1559,7 +2176,7 @@ AdminPembukuan.vue
     {
       "no": 8,
       "name": "Delete Expense",
-      "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/pengeluaran",
+      "endpoint": "https://api.sejadikopi.com/api/pengeluaran",
       "method": "DELETE",
       "params": "id=eq.{expense_id}",
       "headers": {
@@ -1579,7 +2196,7 @@ AdminPembukuan.vue
     {
       "no": 9,
       "name": "Upload Photo to Storage",
-      "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/storage/v1/object/{bucket_name}/expense-photos/{filename}",
+      "endpoint": "https://api.sejadikopi.com/api/object/{bucket_name}/expense-photos/{filename}",
       "method": "POST",
       "payload": "Binary file data",
       "headers": {
@@ -1607,7 +2224,7 @@ AdminPembukuan.vue
     {
       "no": 10,
       "name": "Get Public URL for Uploaded Photo",
-      "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/storage/v1/object/public/{bucket_name}/{file_path}",
+      "endpoint": "https://api.sejadikopi.com/api/object/public/{bucket_name}/{file_path}",
       "method": "GET",
       "params": "None (Public URL generation)",
       "headers": {
@@ -1615,14 +2232,14 @@ AdminPembukuan.vue
       },
       "response": {
         "200": {
-          "publicUrl": "https://wqsizttvrwwddquftpnq.supabase.co/storage/v1/object/public/..."
+          "publicUrl": "https://api.sejadikopi.com/api/object/public/..."
         }
       }
     },
     {
       "no": 11,
       "name": "Check Cafe Status",
-      "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/cafe_settings",
+      "endpoint": "https://api.sejadikopi.com/api/cafe_settings",
       "method": "GET",
       "params": "select=is_open&limit=1",
       "headers": {
@@ -1644,7 +2261,7 @@ AdminPembukuan.vue
     {
       "no": 12,
       "name": "Create Initial Cafe Settings",
-      "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/cafe_settings",
+      "endpoint": "https://api.sejadikopi.com/api/cafe_settings",
       "method": "POST",
       "payload": {
         "is_open": true
@@ -1671,7 +2288,7 @@ AdminPembukuan.vue
     {
       "no": 13,
       "name": "Check Existing Cafe Settings",
-      "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/cafe_settings",
+      "endpoint": "https://api.sejadikopi.com/api/cafe_settings",
       "method": "GET",
       "params": "select=id&limit=1",
       "headers": {
@@ -1693,7 +2310,7 @@ AdminPembukuan.vue
     {
       "no": 14,
       "name": "Update Cafe Status",
-      "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/cafe_settings",
+      "endpoint": "https://api.sejadikopi.com/api/cafe_settings",
       "method": "PATCH",
       "params": "id=eq.{settings_id}",
       "payload": {
@@ -1829,7 +2446,7 @@ Adminmenu.vue
           "no": 1,
           "name": "Get Total Menu Count",
           "method": "GET",
-          "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/menu",
+          "endpoint": "https://api.sejadikopi.com/api/menu",
           "table": "menu",
           "operation": "select",
           "params": {
@@ -1852,7 +2469,7 @@ Adminmenu.vue
           "no": 2,
           "name": "Get All Menu with Category & Stock",
           "method": "GET",
-          "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/menu",
+          "endpoint": "https://api.sejadikopi.com/api/menu",
           "table": "menu",
           "operation": "select",
           "query": "id, stok, kategori_id, kategori_menu!inner(id, nama)",
@@ -1886,7 +2503,7 @@ Adminmenu.vue
           "no": 3,
           "name": "Get Menu List (Without Stock)",
           "method": "GET",
-          "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/menu",
+          "endpoint": "https://api.sejadikopi.com/api/menu",
           "table": "menu",
           "operation": "select",
           "query": "id, nama, harga, foto, kategori_id, kategori_struk, kategori_menu(id, nama)",
@@ -1922,7 +2539,7 @@ Adminmenu.vue
           "no": 4,
           "name": "Get Menu List (With Stock)",
           "method": "GET",
-          "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/menu",
+          "endpoint": "https://api.sejadikopi.com/api/menu",
           "table": "menu",
           "operation": "select",
           "query": "id, nama, harga, foto, stok, kategori_id, kategori_struk, kategori_menu(id, nama)",
@@ -1959,7 +2576,7 @@ Adminmenu.vue
           "no": 5,
           "name": "Get Category List",
           "method": "GET",
-          "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/kategori_menu",
+          "endpoint": "https://api.sejadikopi.com/api/kategori_menu",
           "table": "kategori_menu",
           "operation": "select",
           "query": "id, nama",
@@ -1990,7 +2607,7 @@ Adminmenu.vue
           "no": 6,
           "name": "Insert New Menu",
           "method": "POST",
-          "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/menu",
+          "endpoint": "https://api.sejadikopi.com/api/menu",
           "table": "menu",
           "operation": "insert",
           "payload": {
@@ -2025,7 +2642,7 @@ Adminmenu.vue
           "no": 7,
           "name": "Update Menu",
           "method": "PATCH",
-          "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/menu?id=eq.{menu_id}",
+          "endpoint": "https://api.sejadikopi.com/api/menu?id=eq.{menu_id}",
           "table": "menu",
           "operation": "update",
           "payload": {
@@ -2057,7 +2674,7 @@ Adminmenu.vue
           "no": 8,
           "name": "Delete Menu",
           "method": "DELETE",
-          "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/menu?id=eq.{menu_id}",
+          "endpoint": "https://api.sejadikopi.com/api/menu?id=eq.{menu_id}",
           "table": "menu",
           "operation": "delete",
           "payload": null,
@@ -2084,7 +2701,7 @@ Adminmenu.vue
           "no": 9,
           "name": "Get Current Stock by Menu ID",
           "method": "GET",
-          "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/menu?id=eq.{menu_id}&select=stok",
+          "endpoint": "https://api.sejadikopi.com/api/menu?id=eq.{menu_id}&select=stok",
           "table": "menu",
           "operation": "select",
           "query": "stok",
@@ -2108,7 +2725,7 @@ Adminmenu.vue
           "no": 10,
           "name": "Update Stock (Add Stock)",
           "method": "PATCH",
-          "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/menu?id=eq.{menu_id}",
+          "endpoint": "https://api.sejadikopi.com/api/menu?id=eq.{menu_id}",
           "table": "menu",
           "operation": "update",
           "payload": {
@@ -2132,7 +2749,7 @@ Adminmenu.vue
           "no": 11,
           "name": "Update Stock (Direct Set)",
           "method": "PATCH",
-          "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/menu?id=eq.{menu_id}",
+          "endpoint": "https://api.sejadikopi.com/api/menu?id=eq.{menu_id}",
           "table": "menu",
           "operation": "update",
           "payload": {
@@ -2161,7 +2778,7 @@ Adminmenu.vue
           "no": 12,
           "name": "Get Discount List",
           "method": "GET",
-          "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/discount_codes",
+          "endpoint": "https://api.sejadikopi.com/api/discount_codes",
           "table": "discount_codes",
           "operation": "select",
           "query": "id, code, type, value",
@@ -2196,7 +2813,7 @@ Adminmenu.vue
           "no": 13,
           "name": "Insert Discount",
           "method": "POST",
-          "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/discount_codes",
+          "endpoint": "https://api.sejadikopi.com/api/discount_codes",
           "table": "discount_codes",
           "operation": "insert",
           "payload": {
@@ -2221,7 +2838,7 @@ Adminmenu.vue
           "no": 14,
           "name": "Update Discount",
           "method": "PATCH",
-          "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/discount_codes?id=eq.{discount_id}",
+          "endpoint": "https://api.sejadikopi.com/api/discount_codes?id=eq.{discount_id}",
           "table": "discount_codes",
           "operation": "update",
           "payload": {
@@ -2246,7 +2863,7 @@ Adminmenu.vue
           "no": 15,
           "name": "Delete Discount",
           "method": "DELETE",
-          "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/discount_codes?id=eq.{discount_id}",
+          "endpoint": "https://api.sejadikopi.com/api/discount_codes?id=eq.{discount_id}",
           "table": "discount_codes",
           "operation": "delete",
           "payload": null,
@@ -2272,7 +2889,7 @@ Adminmenu.vue
           "no": 16,
           "name": "Get Categories with Menu Count",
           "method": "GET",
-          "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/kategori_menu",
+          "endpoint": "https://api.sejadikopi.com/api/kategori_menu",
           "table": "kategori_menu",
           "operation": "select",
           "query": "*, menu:menu(count)",
@@ -2305,7 +2922,7 @@ Adminmenu.vue
           "no": 17,
           "name": "Insert Category",
           "method": "POST",
-          "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/kategori_menu",
+          "endpoint": "https://api.sejadikopi.com/api/kategori_menu",
           "table": "kategori_menu",
           "operation": "insert",
           "payload": {
@@ -2328,7 +2945,7 @@ Adminmenu.vue
           "no": 18,
           "name": "Update Category",
           "method": "PATCH",
-          "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/kategori_menu?id=eq.{category_id}",
+          "endpoint": "https://api.sejadikopi.com/api/kategori_menu?id=eq.{category_id}",
           "table": "kategori_menu",
           "operation": "update",
           "payload": {
@@ -2351,7 +2968,7 @@ Adminmenu.vue
           "no": 19,
           "name": "Update Category Order (Drag & Drop)",
           "method": "PATCH",
-          "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/kategori_menu?id=eq.{category_id}",
+          "endpoint": "https://api.sejadikopi.com/api/kategori_menu?id=eq.{category_id}",
           "table": "kategori_menu",
           "operation": "update",
           "payload": {
@@ -2375,7 +2992,7 @@ Adminmenu.vue
           "no": 20,
           "name": "Delete Category",
           "method": "DELETE",
-          "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/kategori_menu?id=eq.{category_id}",
+          "endpoint": "https://api.sejadikopi.com/api/kategori_menu?id=eq.{category_id}",
           "table": "kategori_menu",
           "operation": "delete",
           "payload": null,
@@ -2395,7 +3012,7 @@ Adminmenu.vue
           "no": 21,
           "name": "Get Menus by Category ID",
           "method": "GET",
-          "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/menu?kategori_id=eq.{category_id}",
+          "endpoint": "https://api.sejadikopi.com/api/menu?kategori_id=eq.{category_id}",
           "table": "menu",
           "operation": "select",
           "query": "id, nama, harga, foto, stok, kategori_struk, kategori_id, kategori_menu(id, nama)",
@@ -2440,7 +3057,7 @@ Adminmenu.vue
           "no": 22,
           "name": "Get Additional List",
           "method": "GET",
-          "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/additionals",
+          "endpoint": "https://api.sejadikopi.com/api/additionals",
           "table": "additionals",
           "operation": "select",
           "query": "*",
@@ -2473,7 +3090,7 @@ Adminmenu.vue
           "no": 23,
           "name": "Insert Additional",
           "method": "POST",
-          "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/additionals",
+          "endpoint": "https://api.sejadikopi.com/api/additionals",
           "table": "additionals",
           "operation": "insert",
           "payload": {
@@ -2497,7 +3114,7 @@ Adminmenu.vue
           "no": 24,
           "name": "Update Additional",
           "method": "PATCH",
-          "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/additionals?id=eq.{additional_id}",
+          "endpoint": "https://api.sejadikopi.com/api/additionals?id=eq.{additional_id}",
           "table": "additionals",
           "operation": "update",
           "payload": {
@@ -2521,7 +3138,7 @@ Adminmenu.vue
           "no": 25,
           "name": "Delete Additional",
           "method": "DELETE",
-          "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/additionals?id=eq.{additional_id}",
+          "endpoint": "https://api.sejadikopi.com/api/additionals?id=eq.{additional_id}",
           "table": "additionals",
           "operation": "delete",
           "payload": null,
@@ -2541,7 +3158,7 @@ Adminmenu.vue
           "no": 26,
           "name": "Get Menu Additionals (Junction Table)",
           "method": "GET",
-          "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/menu_additionals?menu_id=eq.{menu_id}",
+          "endpoint": "https://api.sejadikopi.com/api/menu_additionals?menu_id=eq.{menu_id}",
           "table": "menu_additionals",
           "operation": "select",
           "query": "additional_id, additional_menu(id, name, price)",
@@ -2571,7 +3188,7 @@ Adminmenu.vue
           "no": 27,
           "name": "Delete Menu Additional (Remove from Junction)",
           "method": "DELETE",
-          "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/menu_additionals?menu_id=eq.{menu_id}&additional_id=eq.{additional_id}",
+          "endpoint": "https://api.sejadikopi.com/api/menu_additionals?menu_id=eq.{menu_id}&additional_id=eq.{additional_id}",
           "table": "menu_additionals",
           "operation": "delete",
           "payload": null,
@@ -2601,7 +3218,7 @@ Adminmenu.vue
           "no": 28,
           "name": "Get Best Seller Auto Mode Status",
           "method": "GET",
-          "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/cafe_settings?select=best_seller_auto_mode&limit=1",
+          "endpoint": "https://api.sejadikopi.com/api/cafe_settings?select=best_seller_auto_mode&limit=1",
           "table": "cafe_settings",
           "operation": "select",
           "query": "best_seller_auto_mode",
@@ -2624,7 +3241,7 @@ Adminmenu.vue
           "no": 29,
           "name": "Get Sales Data for Best Seller",
           "method": "GET",
-          "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/detail_pesanan",
+          "endpoint": "https://api.sejadikopi.com/api/detail_pesanan",
           "table": "detail_pesanan",
           "operation": "select",
           "query": "menu_id, jumlah, subtotal, pesanan!inner(status, is_hidden)",
@@ -2657,7 +3274,7 @@ Adminmenu.vue
           "no": 30,
           "name": "Update Best Seller Auto Mode",
           "method": "PATCH",
-          "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/cafe_settings?id=eq.{settings_id}",
+          "endpoint": "https://api.sejadikopi.com/api/cafe_settings?id=eq.{settings_id}",
           "table": "cafe_settings",
           "operation": "update",
           "payload": {
@@ -2680,7 +3297,7 @@ Adminmenu.vue
           "no": 31,
           "name": "Insert Best Seller Auto Mode (If Not Exist)",
           "method": "POST",
-          "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/cafe_settings",
+          "endpoint": "https://api.sejadikopi.com/api/cafe_settings",
           "table": "cafe_settings",
           "operation": "insert",
           "payload": {
@@ -2704,7 +3321,7 @@ Adminmenu.vue
           "no": 32,
           "name": "Toggle Best Seller Status (Manual Mode)",
           "method": "PATCH",
-          "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/menu?id=eq.{menu_id}",
+          "endpoint": "https://api.sejadikopi.com/api/menu?id=eq.{menu_id}",
           "table": "menu",
           "operation": "update",
           "payload": {
@@ -2728,7 +3345,7 @@ Adminmenu.vue
           "no": 33,
           "name": "Clear All Best Sellers",
           "method": "PATCH",
-          "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/menu?id=neq.0",
+          "endpoint": "https://api.sejadikopi.com/api/menu?id=neq.0",
           "table": "menu",
           "operation": "update",
           "payload": {
@@ -2755,7 +3372,7 @@ Adminmenu.vue
           "no": 34,
           "name": "Set Top 10 as Best Sellers (Auto Mode)",
           "method": "PATCH",
-          "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/menu?id=in.({top10_ids})",
+          "endpoint": "https://api.sejadikopi.com/api/menu?id=in.({top10_ids})",
           "table": "menu",
           "operation": "update",
           "payload": {
@@ -2788,7 +3405,7 @@ Adminmenu.vue
           "no": 35,
           "name": "Get Store Status (is_open)",
           "method": "GET",
-          "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/cafe_settings?select=is_open&limit=1",
+          "endpoint": "https://api.sejadikopi.com/api/cafe_settings?select=is_open&limit=1",
           "table": "cafe_settings",
           "operation": "select",
           "query": "is_open",
@@ -2811,7 +3428,7 @@ Adminmenu.vue
           "no": 36,
           "name": "Insert Store Status (If Not Exist)",
           "method": "POST",
-          "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/cafe_settings",
+          "endpoint": "https://api.sejadikopi.com/api/cafe_settings",
           "table": "cafe_settings",
           "operation": "insert",
           "payload": {
@@ -2834,7 +3451,7 @@ Adminmenu.vue
           "no": 37,
           "name": "Update Store Status (Open/Close)",
           "method": "PATCH",
-          "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/cafe_settings?id=eq.{settings_id}",
+          "endpoint": "https://api.sejadikopi.com/api/cafe_settings?id=eq.{settings_id}",
           "table": "cafe_settings",
           "operation": "update",
           "payload": {
@@ -2864,7 +3481,7 @@ Adminmenu.vue
           "no": 38,
           "name": "Upload Menu Image",
           "method": "POST",
-          "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/storage/v1/object/assets/Menu/{filename}",
+          "endpoint": "https://api.sejadikopi.com/api/object/assets/Menu/{filename}",
           "bucket": "assets",
           "folder": "Menu",
           "operation": "upload",
@@ -2892,7 +3509,7 @@ Adminmenu.vue
           "no": 39,
           "name": "Get Public URL for Image",
           "method": "GET",
-          "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/storage/v1/object/public/assets/Menu/{filename}",
+          "endpoint": "https://api.sejadikopi.com/api/object/public/assets/Menu/{filename}",
           "bucket": "assets",
           "operation": "getPublicUrl",
           "payload": null,
@@ -2900,7 +3517,7 @@ Adminmenu.vue
             "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
           },
           "response_success": {
-            "publicUrl": "https://wqsizttvrwwddquftpnq.supabase.co/storage/v1/object/public/assets/Menu/coffee.jpg"
+            "publicUrl": "https://api.sejadikopi.com/api/object/public/assets/Menu/coffee.jpg"
           },
           "response_error": {
             "error": "Not found"
@@ -2953,7 +3570,7 @@ Adminmenu.vue
           "no": 41,
           "name": "Get Settings ID for Update",
           "method": "GET",
-          "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/cafe_settings?select=id&limit=1",
+          "endpoint": "https://api.sejadikopi.com/api/cafe_settings?select=id&limit=1",
           "table": "cafe_settings",
           "operation": "select",
           "query": "id",
@@ -2975,7 +3592,7 @@ Adminmenu.vue
           "no": 42,
           "name": "Sync Kategori Struk for All Menus",
           "method": "PATCH",
-          "endpoint": "https://wqsizttvrwwddquftpnq.supabase.co/rest/v1/menu?id=eq.{menu_id}",
+          "endpoint": "https://api.sejadikopi.com/api/menu?id=eq.{menu_id}",
           "table": "menu",
           "operation": "update",
           "payload": {

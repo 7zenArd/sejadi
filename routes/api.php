@@ -20,6 +20,7 @@ use App\Models\DiscountCode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
 
 Route::prefix('/object/public/assets/')->group(function () {
     Route::get('/Menu/{foto_path}', function (string $foto_path) {
@@ -1317,16 +1318,16 @@ Route::prefix('auth')->group(function () {
 
         $user = Auth::user();
 
-        // Generate token data (replace with your actual token generation logic)
+        // Generate bearer token using Sanctum
+        $token = $user->createToken('auth-token')->plainTextToken;
         $tokenData = [
-            'access_token' => 'your_access_token',
+            'access_token' => $token,
             'token_type' => 'Bearer',
             'expires_in' => 3600,
             'expires_at' => now()->addHours(1)->toDateTimeString(),
-            'refresh_token' => 'your_refresh_token',
+            'refresh_token' => Str::random(40),
             'last_sign_in_at' => now()->toDateTimeString(),
         ];
-
         return response()->json([
             'access_token' => $tokenData['access_token'],
             'token_type' => $tokenData['token_type'],
@@ -1771,7 +1772,7 @@ Route::prefix('pesanans')->group(function () {
                 $query->where('no_meja', $req->input('no_meja'));
             }
             if ($req->has('status')) {
-                $query->where('status', $req->input('status'));
+                $query->where('status', explode(',',$req->input('status')));
             }
             if ($req->has('location_type')) {
                 $query->where('location_type', $req->input('location_type'));

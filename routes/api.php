@@ -1319,9 +1319,8 @@ Route::prefix('auth')->group(function () {
         $user = Auth::user();
 
         // Generate bearer token using Sanctum
-        $token = $user->createToken('auth-token')->plainTextToken;
         $tokenData = [
-            'access_token' => $token,
+            'access_token' => 'aosdoasoidoiajsdkwoaijdosa',
             'token_type' => 'Bearer',
             'expires_in' => 3600,
             'expires_at' => now()->addHours(1)->toDateTimeString(),
@@ -1802,7 +1801,7 @@ Route::prefix('pesanans')->group(function () {
                 $order = explode('.', $req['order']);
                 $query = $query->orderBy($order[0], $order[1] ?? 'asc');
             }
-            $res = $query->get();
+            $res = $query->with('detailPesanans')->get();
 
             return response()->json(['data' => $res], 200);
         } catch (\Throwable $th) {

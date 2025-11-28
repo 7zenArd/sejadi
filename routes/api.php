@@ -452,6 +452,38 @@ Route::prefix('discount_codes')->group(function () {
             return response()->json(['error' => 'Internal Server Error'], 500);
         }
     });
+
+    Route::post('/', function (Request $req) {
+        try {
+            $discountCode = DiscountCode::create($req->all());
+
+            return response()->json(['data' => $discountCode, 'message' => 'Discount Code Created'], 201);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+
+    Route::put('/{id}', function (Request $req, string $id) {
+        try {
+            $discountCode = DiscountCode::findOrFail($id);
+            $discountCode->update($req->all());
+
+            return response()->json(['data' => $discountCode, 'message' => 'Discount Code Updated'], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+
+    Route::delete('/{id}', function (string $id) {
+        try {
+            $discountCode = DiscountCode::findOrFail($id);
+            $discountCode->delete();
+
+            return response()->json(['message' => 'Discount Code Deleted'], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
 });
 
 Route::prefix('export_histories')->group(function () {
@@ -469,6 +501,38 @@ Route::prefix('export_histories')->group(function () {
             $res = $query->get();
 
             return response()->json(['data' => $res], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+
+    Route::post('/', function (Request $req) {
+        try {
+            $exportHistory = ExportHistory::create($req->all());
+
+            return response()->json(['data' => $exportHistory, 'message' => 'Export History Created'], 201);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+
+    Route::put('/{id}', function (Request $req, string $id) {
+        try {
+            $exportHistory = ExportHistory::findOrFail($id);
+            $exportHistory->update($req->all());
+
+            return response()->json(['data' => $exportHistory, 'message' => 'Export History Updated'], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+
+    Route::delete('/{id}', function (string $id) {
+        try {
+            $exportHistory = ExportHistory::findOrFail($id);
+            $exportHistory->delete();
+
+            return response()->json(['message' => 'Export History Deleted'], 200);
         } catch (\Throwable $th) {
             return response()->json(['error' => 'Internal Server Error'], 500);
         }
@@ -494,6 +558,38 @@ Route::prefix('history_archives')->group(function () {
             return response()->json(['error' => 'Internal Server Error'], 500);
         }
     });
+
+    Route::post('/', function (Request $req) {
+        try {
+            $historyArchive = HistoryArchive::create($req->all());
+
+            return response()->json(['data' => $historyArchive, 'message' => 'History Archive Created'], 201);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+
+    Route::put('/{id}', function (Request $req, string $id) {
+        try {
+            $historyArchive = HistoryArchive::findOrFail($id);
+            $historyArchive->update($req->all());
+
+            return response()->json(['data' => $historyArchive, 'message' => 'History Archive Updated'], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+
+    Route::delete('/{id}', function (string $id) {
+        try {
+            $historyArchive = HistoryArchive::findOrFail($id);
+            $historyArchive->delete();
+
+            return response()->json(['message' => 'History Archive Deleted'], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
 });
 
 Route::prefix('pemasukan_lains')->group(function () {
@@ -511,6 +607,38 @@ Route::prefix('pemasukan_lains')->group(function () {
             $res = $query->get();
 
             return response()->json(['data' => $res], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+
+    Route::post('/', function (Request $req) {
+        try {
+            $pemasukanLain = PemasukanLain::create($req->all());
+
+            return response()->json(['data' => $pemasukanLain, 'message' => 'Pemasukan Lain Created'], 201);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+
+    Route::put('/{id}', function (Request $req, string $id) {
+        try {
+            $pemasukanLain = PemasukanLain::findOrFail($id);
+            $pemasukanLain->update($req->all());
+
+            return response()->json(['data' => $pemasukanLain, 'message' => 'Pemasukan Lain Updated'], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+
+    Route::delete('/{id}', function (string $id) {
+        try {
+            $pemasukanLain = PemasukanLain::findOrFail($id);
+            $pemasukanLain->delete();
+
+            return response()->json(['message' => 'Pemasukan Lain Deleted'], 200);
         } catch (\Throwable $th) {
             return response()->json(['error' => 'Internal Server Error'], 500);
         }
@@ -536,6 +664,38 @@ Route::prefix('pengeluarans')->group(function () {
             return response()->json(['error' => 'Internal Server Error'], 500);
         }
     });
+
+    Route::post('/', function (Request $req) {
+        try {
+            $pengeluaran = Pengeluaran::create($req->all());
+
+            return response()->json(['data' => $pengeluaran, 'message' => 'Pengeluaran Created'], 201);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+
+    Route::put('/{id}', function (Request $req, string $id) {
+        try {
+            $pengeluaran = Pengeluaran::findOrFail($id);
+            $pengeluaran->update($req->all());
+
+            return response()->json(['data' => $pengeluaran, 'message' => 'Pengeluaran Updated'], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+
+    Route::delete('/{id}', function (string $id) {
+        try {
+            $pengeluaran = Pengeluaran::findOrFail($id);
+            $pengeluaran->delete();
+
+            return response()->json(['message' => 'Pengeluaran Deleted'], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
 });
 
 Route::prefix('struks')->group(function () {
@@ -553,6 +713,38 @@ Route::prefix('struks')->group(function () {
             $res = $query->get();
 
             return response()->json(['data' => $res], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+
+    Route::post('/', function (Request $req) {
+        try {
+            $struk = Struk::create($req->all());
+
+            return response()->json(['data' => $struk, 'message' => 'Struk Created'], 201);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+
+    Route::put('/{id}', function (Request $req, string $id) {
+        try {
+            $struk = Struk::findOrFail($id);
+            $struk->update($req->all());
+
+            return response()->json(['data' => $struk, 'message' => 'Struk Updated'], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+
+    Route::delete('/{id}', function (string $id) {
+        try {
+            $struk = Struk::findOrFail($id);
+            $struk->delete();
+
+            return response()->json(['message' => 'Struk Deleted'], 200);
         } catch (\Throwable $th) {
             return response()->json(['error' => 'Internal Server Error'], 500);
         }

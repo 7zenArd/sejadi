@@ -15,6 +15,7 @@ use App\Models\PemasukanLain;
 use App\Models\Pengeluaran;
 use App\Models\Pesanan;
 use App\Models\Struk;
+use App\Models\User;
 use App\Models\DiscountCode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -30,6 +31,221 @@ Route::prefix('/object/public/assets/')->group(function () {
 
         return response()->file($filePath);
     });
+
+Route::prefix('users')->group(function () {
+    Route::get('/', function (Request $req) {
+        try {
+            $query = User::query();
+            if ($req->has('select')) {
+                $select = explode(',', $req['select']);
+                if (in_array('*', $select)) {
+                    $query = $query->select('*');
+                } else {
+                    $query = $query->select($select);
+                }
+            }
+            if ($req->has('name')) {
+                $query->where('name', 'like', '%'.$req->input('name').'%');
+            }
+            if ($req->has('email')) {
+                $query->where('email', $req->input('email'));
+            }
+            if ($req->has('created_from')) {
+                $query->where('created_at', '>=', $req->input('created_from'));
+            }
+            if ($req->has('created_to')) {
+                $query->where('created_at', '<=', $req->input('created_to'));
+            }
+            if ($req->has('order')) {
+                $order = explode('.', $req['order']);
+                $query = $query->orderBy($order[0], $order[1] ?? 'asc');
+            }
+            $res = $query->get();
+
+            return response()->json(['data' => $res], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+
+    Route::get('/{id}', function (int $id) {
+        try {
+            $user = User::findOrFail($id);
+
+            return response()->json($user, 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+    });
+
+    Route::post('/', function (Request $req) {
+        try {
+            $validatedData = $req->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|string|email|max:255|unique:users',
+                'password' => 'required|string|min:8',
+            ]);
+
+            $validatedData['password'] = bcrypt($validatedData['password']);
+
+            $user = User::create($validatedData);
+
+            return response()->json($user, 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+
+    Route::put('/{id}', function (Request $req, int $id) {
+        try {
+            $user = User::findOrFail($id);
+
+            $validatedData = $req->validate([
+                'name' => 'string|max:255',
+                'email' => 'string|email|max:255|unique:users,email,'.$id,
+            ]);
+
+            $user->update($validatedData);
+
+            return response()->json($user, 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+
+    Route::delete('/{id}', function (int $id) {
+        try {
+            $user = User::findOrFail($id);
+            $user->delete();
+
+            return response()->json(['message' => 'User deleted successfully'], 204);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+    });
+});
+
+Route::prefix('struks')->group(function () {
+    Route::get('/', function (Request $req) {
+        try {
+            $query = Struk::query();
+            if ($req->has('select')) {
+                $select = explode(',', $req['select']);
+                if (in_array('*', $select)) {
+                    $query = $query->select('*');
+                } else {
+                    $query = $query->select($select);
+                }
+            }
+            if ($req->has('pesanan_id')) {
+                $query->where('pesanan_id', $req->input('pesanan_id'));
+            }
+            if ($req->has('kasir_id')) {
+                $query->where('kasir_id', $req->input('kasir_id'));
+            }
+            if ($req->has('total_min')) {
+                $query->where('total', '>=', $req->input('total_min'));
+            }
+            if ($req->has('total_max')) {
+                $query->where('total', '<=', $req->input('total_max'));
+            }
+            if ($req->has('dibayar_min')) {
+                $query->where('dibayar', '>=', $req->input('dibayar_min'));
+            }
+            if ($req->has('dibayar_max')) {
+                $query->where('dibayar', '<=', $req->input('dibayar_max'));
+            }
+            if ($req->has('kembalian_min')) {
+                $query->where('kembalian', '>=', $req->input('kembalian_min'));
+            }
+            if ($req->has('kembalian_max')) {
+                $query->where('kembalian', '<=', $req->input('kembalian_max'));
+            }
+            if ($req->has('created_from')) {
+                $query->where('created_at', '>=', $req->input('created_from'));
+            }
+            if ($req->has('created_to')) {
+                $query->where('created_at', '<=', $req->input('created_to'));
+            }
+            if ($req->has('order')) {
+                $order = explode('.', $req['order']);
+                $query = $query->orderBy($order[0], $order[1] ?? 'asc');
+            }
+            $res = $query->get();
+
+            return response()->json(['data' => $res], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+
+    Route::get('/{id}', function (int $id) {
+        try {
+            $struk = Struk::findOrFail($id);
+
+            return response()->json($struk, 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Struk not found'], 404);
+        }
+    });
+
+    Route::post('/', function (Request $req) {
+        try {
+            $validatedData = $req->validate([
+                'pesanan_id' => 'required|integer|exists:pesanan,id',
+                'kasir_id' => 'required|integer|exists:users,id',
+                'total' => 'required|numeric',
+                'dibayar' => 'required|numeric',
+                'kembalian' => 'required|numeric',
+            ]);
+
+            $struk = Struk::create($validatedData);
+
+            return response()->json($struk, 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+
+    Route::put('/{id}', function (Request $req, int $id) {
+        try {
+            $struk = Struk::findOrFail($id);
+
+            $validatedData = $req->validate([
+                'pesanan_id' => 'integer|exists:pesanan,id',
+                'kasir_id' => 'integer|exists:users,id',
+                'total' => 'numeric',
+                'dibayar' => 'numeric',
+                'kembalian' => 'numeric',
+            ]);
+
+            $struk->update($validatedData);
+
+            return response()->json($struk, 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+
+    Route::delete('/{id}', function (int $id) {
+        try {
+            $struk = Struk::findOrFail($id);
+            $struk->delete();
+
+            return response()->json(['message' => 'Struk deleted successfully'], 204);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Struk not found'], 404);
+        }
+    });
+});
 
 Route::prefix('history-archives')->group(function () {
     Route::get('/', function (Request $req) {
@@ -374,7 +590,6 @@ Route::prefix('menu-additional-config')->group(function () {
 
 Route::prefix('additionals')->group(function () {
     Route::get('/', function (Request $req) {
-        try {
             $query = Additional::query();
 
             if ($req->has('is_active')) {
@@ -393,15 +608,16 @@ Route::prefix('additionals')->group(function () {
 
             if ($req->has('order')) {
                 $order = explode('.', $req['order']);
-                $query = $query->orderBy($order[0], $order[1] ?? 'asc');
+                if(isset($order[1])){
+                    $query = $query->orderBy($order[0], $order[1] ?? 'asc');
+                }else{
+                    $query = $query->orderBy('id', $order[1] ?? 'asc');
+                }
             }
 
             $res = $query->get();
 
             return response()->json(['data' => $res], 200);
-        } catch (\Throwable $th) {
-            return response()->json(['error' => 'Internal Server Error'], 500);
-        }
     });
 });
 
@@ -795,7 +1011,7 @@ Route::prefix('menu_additional_config')->group(function () {
     });
 });
 
-Route::prefix('menu-allowed-additionals')->group(function () {
+Route::prefix('menu_allowed_additionals')->group(function () {
     Route::get('/', function (Request $req) {
         try {
             $query = MenuAllowedAdditionals::query();
@@ -1440,6 +1656,28 @@ Route::prefix('pengeluarans')->group(function () {
                     $query = $query->select($select);
                 }
             }
+            if ($req->has('kategori')) {
+                $query->where('kategori', $req->input('kategori'));
+            }
+            if ($req->has('created_by')) {
+                $query->where('created_by', $req->input('created_by'));
+            }
+            if ($req->has('tanggal_from')) {
+                $query->where('tanggal', '>=', $req->input('tanggal_from'));
+            }
+            if ($req->has('tanggal_to')) {
+                $query->where('tanggal', '<=', $req->input('tanggal_to'));
+            }
+            if ($req->has('jumlah_min')) {
+                $query->where('jumlah', '>=', $req->input('jumlah_min'));
+            }
+            if ($req->has('jumlah_max')) {
+                $query->where('jumlah', '<=', $req->input('jumlah_max'));
+            }
+            if ($req->has('order')) {
+                $order = explode('.', $req['order']);
+                $query = $query->orderBy($order[0], $order[1] ?? 'asc');
+            }
             $res = $query->get();
 
             return response()->json(['data' => $res], 200);
@@ -1448,11 +1686,34 @@ Route::prefix('pengeluarans')->group(function () {
         }
     });
 
+    Route::get('/{id}', function (string $id) {
+        try {
+            $pengeluaran = Pengeluaran::findOrFail($id);
+
+            return response()->json($pengeluaran, 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Pengeluaran not found'], 404);
+        }
+    });
+
     Route::post('/', function (Request $req) {
         try {
-            $pengeluaran = Pengeluaran::create($req->all());
+            $validatedData = $req->validate([
+                'id' => 'required|string|unique:pengeluaran,id',
+                'kategori' => 'required|string',
+                'deskripsi' => 'string|nullable',
+                'jumlah' => 'required|numeric',
+                'tanggal' => 'required|date',
+                'created_by' => 'string|nullable',
+                'bukti_url' => 'string|nullable',
+                'foto_url' => 'string|nullable',
+            ]);
 
-            return response()->json(['data' => $pengeluaran, 'message' => 'Pengeluaran Created'], 201);
+            $pengeluaran = Pengeluaran::create($validatedData);
+
+            return response()->json($pengeluaran, 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
         } catch (\Throwable $th) {
             return response()->json(['error' => 'Internal Server Error'], 500);
         }
@@ -1461,9 +1722,22 @@ Route::prefix('pengeluarans')->group(function () {
     Route::put('/{id}', function (Request $req, string $id) {
         try {
             $pengeluaran = Pengeluaran::findOrFail($id);
-            $pengeluaran->update($req->all());
 
-            return response()->json(['data' => $pengeluaran, 'message' => 'Pengeluaran Updated'], 200);
+            $validatedData = $req->validate([
+                'kategori' => 'string',
+                'deskripsi' => 'string|nullable',
+                'jumlah' => 'numeric',
+                'tanggal' => 'date',
+                'created_by' => 'string|nullable',
+                'bukti_url' => 'string|nullable',
+                'foto_url' => 'string|nullable',
+            ]);
+
+            $pengeluaran->update($validatedData);
+
+            return response()->json($pengeluaran, 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
         } catch (\Throwable $th) {
             return response()->json(['error' => 'Internal Server Error'], 500);
         }
@@ -1474,17 +1748,17 @@ Route::prefix('pengeluarans')->group(function () {
             $pengeluaran = Pengeluaran::findOrFail($id);
             $pengeluaran->delete();
 
-            return response()->json(['message' => 'Pengeluaran Deleted'], 200);
+            return response()->json(['message' => 'Pengeluaran deleted successfully'], 204);
         } catch (\Throwable $th) {
-            return response()->json(['error' => 'Internal Server Error'], 500);
+            return response()->json(['error' => 'Pengeluaran not found'], 404);
         }
     });
 });
 
-Route::prefix('struks')->group(function () {
+Route::prefix('pesanans')->group(function () {
     Route::get('/', function (Request $req) {
         try {
-            $query = Struk::query();
+            $query = Pesanan::query();
             if ($req->has('select')) {
                 $select = explode(',', $req['select']);
                 if (in_array('*', $select)) {
@@ -1492,6 +1766,40 @@ Route::prefix('struks')->group(function () {
                 } else {
                     $query = $query->select($select);
                 }
+            }
+            if ($req->has('no_meja')) {
+                $query->where('no_meja', $req->input('no_meja'));
+            }
+            if ($req->has('status')) {
+                $query->where('status', $req->input('status'));
+            }
+            if ($req->has('location_type')) {
+                $query->where('location_type', $req->input('location_type'));
+            }
+            if ($req->has('discount_code')) {
+                $query->where('discount_code', $req->input('discount_code'));
+            }
+            if ($req->has('is_hidden')) {
+                $query->where('is_hidden', $req->input('is_hidden'));
+            }
+            if ($req->has('is_final')) {
+                $query->where('is_final', $req->input('is_final'));
+            }
+            if ($req->has('total_min')) {
+                $query->where('total', '>=', $req->input('total_min'));
+            }
+            if ($req->has('total_max')) {
+                $query->where('total', '<=', $req->input('total_max'));
+            }
+            if ($req->has('created_from')) {
+                $query->where('created_at', '>=', $req->input('created_from'));
+            }
+            if ($req->has('created_to')) {
+                $query->where('created_at', '<=', $req->input('created_to'));
+            }
+            if ($req->has('order')) {
+                $order = explode('.', $req['order']);
+                $query = $query->orderBy($order[0], $order[1] ?? 'asc');
             }
             $res = $query->get();
 
@@ -1501,35 +1809,94 @@ Route::prefix('struks')->group(function () {
         }
     });
 
+    Route::get('/{id}', function (int $id) {
+        try {
+            $pesanan = Pesanan::findOrFail($id);
+
+            return response()->json($pesanan, 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Pesanan not found'], 404);
+        }
+    });
+
     Route::post('/', function (Request $req) {
         try {
-            $struk = Struk::create($req->all());
+            $validatedData = $req->validate([
+                'no_meja' => 'integer|nullable',
+                'status' => 'required|string|in:pending,processed,completed,cancelled',
+                'total' => 'required|numeric',
+                'note' => 'string|nullable',
+                'cancellation_reason' => 'string|nullable',
+                'cancelled_at' => 'date|nullable',
+                'location_type' => 'string|in:dine_in,take_away,delivery|nullable',
+                'pickup_time' => 'date|nullable',
+                'discount_code' => 'string|nullable',
+                'discount_amount' => 'numeric|nullable',
+                'total_after_discount' => 'numeric|nullable',
+                'processed_at' => 'date|nullable',
+                'completed_at' => 'date|nullable',
+                'is_hidden' => 'boolean',
+                'archived_at' => 'date|nullable',
+                'location_area' => 'string|nullable',
+                'metode_pembayaran' => 'string|nullable',
+                'bank_qris' => 'string|nullable',
+                'is_final' => 'boolean',
+            ]);
 
-            return response()->json(['data' => $struk, 'message' => 'Struk Created'], 201);
+            $pesanan = Pesanan::create($validatedData);
+
+            return response()->json($pesanan, 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
         } catch (\Throwable $th) {
             return response()->json(['error' => 'Internal Server Error'], 500);
         }
     });
 
-    Route::put('/{id}', function (Request $req, string $id) {
+    Route::put('/{id}', function (Request $req, int $id) {
         try {
-            $struk = Struk::findOrFail($id);
-            $struk->update($req->all());
+            $pesanan = Pesanan::findOrFail($id);
 
-            return response()->json(['data' => $struk, 'message' => 'Struk Updated'], 200);
+            $validatedData = $req->validate([
+                'no_meja' => 'integer|nullable',
+                'status' => 'string|in:pending,processed,completed,cancelled',
+                'total' => 'numeric',
+                'note' => 'string|nullable',
+                'cancellation_reason' => 'string|nullable',
+                'cancelled_at' => 'date|nullable',
+                'location_type' => 'string|in:dine_in,take_away,delivery|nullable',
+                'pickup_time' => 'date|nullable',
+                'discount_code' => 'string|nullable',
+                'discount_amount' => 'numeric|nullable',
+                'total_after_discount' => 'numeric|nullable',
+                'processed_at' => 'date|nullable',
+                'completed_at' => 'date|nullable',
+                'is_hidden' => 'boolean',
+                'archived_at' => 'date|nullable',
+                'location_area' => 'string|nullable',
+                'metode_pembayaran' => 'string|nullable',
+                'bank_qris' => 'string|nullable',
+                'is_final' => 'boolean',
+            ]);
+
+            $pesanan->update($validatedData);
+
+            return response()->json($pesanan, 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
         } catch (\Throwable $th) {
             return response()->json(['error' => 'Internal Server Error'], 500);
         }
     });
 
-    Route::delete('/{id}', function (string $id) {
+    Route::delete('/{id}', function (int $id) {
         try {
-            $struk = Struk::findOrFail($id);
-            $struk->delete();
+            $pesanan = Pesanan::findOrFail($id);
+            $pesanan->delete();
 
-            return response()->json(['message' => 'Struk Deleted'], 200);
+            return response()->json(['message' => 'Pesanan deleted successfully'], 204);
         } catch (\Throwable $th) {
-            return response()->json(['error' => 'Internal Server Error'], 500);
+            return response()->json(['error' => 'Pesanan not found'], 404);
         }
     });
 });

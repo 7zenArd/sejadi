@@ -3,7 +3,7 @@
 use App\Models\Additional;
 use App\Models\CafeSetting;
 use App\Models\DetailPesanan;
-use App\Models\DiscountCode;
+
 use App\Models\ExportHistory;
 use App\Models\HistoryArchive;
 use App\Models\KategoriMenu;
@@ -15,6 +15,7 @@ use App\Models\PemasukanLain;
 use App\Models\Pengeluaran;
 use App\Models\Pesanan;
 use App\Models\Struk;
+use App\Models\DiscountCode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -29,6 +30,205 @@ Route::prefix('/object/public/assets/')->group(function () {
 
         return response()->file($filePath);
     });
+
+Route::prefix('history-archives')->group(function () {
+    Route::get('/', function (Request $req) {
+        try {
+            $query = HistoryArchive::query();
+            if ($req->has('select')) {
+                $select = explode(',', $req['select']);
+                if (in_array('*', $select)) {
+                    $query = $query->select('*');
+                } else {
+                    $query = $query->select($select);
+                }
+            }
+            if ($req->has('archive_type')) {
+                $query->where('archive_type', $req->input('archive_type'));
+            }
+            if ($req->has('user_id')) {
+                $query->where('user_id', $req->input('user_id'));
+            }
+            if ($req->has('created_from')) {
+                $query->where('created_at', '>=', $req->input('created_from'));
+            }
+            if ($req->has('created_to')) {
+                $query->where('created_at', '<=', $req->input('created_to'));
+            }
+            if ($req->has('order')) {
+                $order = explode('.', $req['order']);
+                $query = $query->orderBy($order[0], $order[1] ?? 'asc');
+            }
+            $res = $query->get();
+
+            return response()->json(['data' => $res], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+
+    Route::get('/{id}', function (int $id) {
+        try {
+            $historyArchive = HistoryArchive::findOrFail($id);
+
+            return response()->json($historyArchive, 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'History Archive not found'], 404);
+        }
+    });
+
+    Route::post('/', function (Request $req) {
+        try {
+            $validatedData = $req->validate([
+                'archive_type' => 'required|string|in:order,menu,report,user',
+                'data' => 'required|json',
+                'user_id' => 'integer|nullable',
+            ]);
+
+            $historyArchive = HistoryArchive::create($validatedData);
+
+            return response()->json($historyArchive, 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+
+    Route::put('/{id}', function (Request $req, int $id) {
+        try {
+            $historyArchive = HistoryArchive::findOrFail($id);
+
+            $validatedData = $req->validate([
+                'archive_type' => 'string|in:order,menu,report,user',
+                'data' => 'json',
+                'user_id' => 'integer|nullable',
+            ]);
+
+            $historyArchive->update($validatedData);
+
+            return response()->json($historyArchive, 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+
+    Route::delete('/{id}', function (int $id) {
+        try {
+            $historyArchive = HistoryArchive::findOrFail($id);
+            $historyArchive->delete();
+
+            return response()->json(['message' => 'History Archive deleted successfully'], 204);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'History Archive not found'], 404);
+        }
+    });
+});
+
+Route::prefix('export-histories')->group(function () {
+    Route::get('/', function (Request $req) {
+        try {
+            $query = ExportHistory::query();
+            if ($req->has('select')) {
+                $select = explode(',', $req['select']);
+                if (in_array('*', $select)) {
+                    $query = $query->select('*');
+                } else {
+                    $query = $query->select($select);
+                }
+            }
+            if ($req->has('export_type')) {
+                $query->where('export_type', $req->input('export_type'));
+            }
+            if ($req->has('status')) {
+                $query->where('status', $req->input('status'));
+            }
+            if ($req->has('user_id')) {
+                $query->where('user_id', $req->input('user_id'));
+            }
+            if ($req->has('created_from')) {
+                $query->where('created_at', '>=', $req->input('created_from'));
+            }
+            if ($req->has('created_to')) {
+                $query->where('created_at', '<=', $req->input('created_to'));
+            }
+            if ($req->has('order')) {
+                $order = explode('.', $req['order']);
+                $query = $query->orderBy($order[0], $order[1] ?? 'asc');
+            }
+            $res = $query->get();
+
+            return response()->json(['data' => $res], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+
+    Route::get('/{id}', function (int $id) {
+        try {
+            $exportHistory = ExportHistory::findOrFail($id);
+
+            return response()->json($exportHistory, 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Export History not found'], 404);
+        }
+    });
+
+    Route::post('/', function (Request $req) {
+        try {
+            $validatedData = $req->validate([
+                'export_type' => 'required|string|in:order,menu,report',
+                'status' => 'required|string|in:pending,completed,failed',
+                'file_path' => 'string|nullable',
+                'user_id' => 'integer|nullable',
+                'metadata' => 'json|nullable',
+            ]);
+
+            $exportHistory = ExportHistory::create($validatedData);
+
+            return response()->json($exportHistory, 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+
+    Route::put('/{id}', function (Request $req, int $id) {
+        try {
+            $exportHistory = ExportHistory::findOrFail($id);
+
+            $validatedData = $req->validate([
+                'export_type' => 'string|in:order,menu,report',
+                'status' => 'string|in:pending,completed,failed',
+                'file_path' => 'string|nullable',
+                'user_id' => 'integer|nullable',
+                'metadata' => 'json|nullable',
+            ]);
+
+            $exportHistory->update($validatedData);
+
+            return response()->json($exportHistory, 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+
+    Route::delete('/{id}', function (int $id) {
+        try {
+            $exportHistory = ExportHistory::findOrFail($id);
+            $exportHistory->delete();
+
+            return response()->json(['message' => 'Export History deleted successfully'], 204);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Export History not found'], 404);
+        }
+    });
+});
 });
 
 Route::prefix('best-sellers')->group(function () {
@@ -205,10 +405,370 @@ Route::prefix('additionals')->group(function () {
     });
 });
 
-Route::prefix('menu_additional_config')->group(function () {
+Route::prefix('discount-codes')->group(function () {
+    Route::get('/', function (Request $req) {
+        try {
+            $query = DiscountCode::query();
+            if ($req->has('select')) {
+                $select = explode(',', $req['select']);
+                if (in_array('*', $select)) {
+                    $query = $query->select('*');
+                } else {
+                    $query = $query->select($select);
+                }
+            }
+            if ($req->has('code')) {
+                $query->where('code', $req->input('code'));
+            }
+            if ($req->has('is_active')) {
+                $query->where('is_active', $req->input('is_active'));
+            }
+            if ($req->has('type')) {
+                $query->where('type', $req->input('type'));
+            }
+            if ($req->has('min_amount')) {
+                $query->where('min_amount', '<=', $req->input('min_amount'));
+            }
+            if ($req->has('max_discount_amount')) {
+                $query->where('max_discount_amount', '>=', $req->input('max_discount_amount'));
+            }
+            if ($req->has('valid_from')) {
+                $query->where('valid_from', '<=', $req->input('valid_from'));
+            }
+            if ($req->has('valid_to')) {
+                $query->where('valid_to', '>=', $req->input('valid_to'));
+            }
+            if ($req->has('usage_limit')) {
+                $query->where('usage_limit', '>=', $req->input('usage_limit'));
+            }
+            if ($req->has('used_count')) {
+                $query->where('used_count', '<=', $req->input('used_count'));
+            }
+            if ($req->has('order')) {
+                $order = explode('.', $req['order']);
+                $query = $query->orderBy($order[0], $order[1] ?? 'asc');
+            }
+            $res = $query->get();
+
+            return response()->json(['data' => $res], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+
+    Route::get('/{id}', function (int $id) {
+        try {
+            $discountCode = DiscountCode::findOrFail($id);
+
+            return response()->json($discountCode, 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Discount Code not found'], 404);
+        }
+    });
+
+    Route::post('/', function (Request $req) {
+        try {
+            $validatedData = $req->validate([
+                'code' => 'required|string|unique:discount_codes,code',
+                'type' => 'required|string|in:percentage,fixed',
+                'value' => 'required|numeric|min:0',
+                'is_active' => 'boolean',
+                'min_amount' => 'numeric|min:0|nullable',
+                'max_discount_amount' => 'numeric|min:0|nullable',
+                'valid_from' => 'date|nullable',
+                'valid_to' => 'date|after_or_equal:valid_from|nullable',
+                'usage_limit' => 'integer|min:0|nullable',
+                'used_count' => 'integer|min:0|nullable',
+            ]);
+
+            $discountCode = DiscountCode::create($validatedData);
+
+            return response()->json($discountCode, 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+
+    Route::put('/{id}', function (Request $req, int $id) {
+        try {
+            $discountCode = DiscountCode::findOrFail($id);
+
+            $validatedData = $req->validate([
+                'code' => 'string|unique:discount_codes,code,'.$id,
+                'type' => 'string|in:percentage,fixed',
+                'value' => 'numeric|min:0',
+                'is_active' => 'boolean',
+                'min_amount' => 'numeric|min:0|nullable',
+                'max_discount_amount' => 'numeric|min:0|nullable',
+                'valid_from' => 'date|nullable',
+                'valid_to' => 'date|after_or_equal:valid_from|nullable',
+                'usage_limit' => 'integer|min:0|nullable',
+                'used_count' => 'integer|min:0|nullable',
+            ]);
+
+            $discountCode->update($validatedData);
+
+            return response()->json($discountCode, 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+
+    Route::delete('/{id}', function (int $id) {
+        try {
+            $discountCode = DiscountCode::findOrFail($id);
+            $discountCode->delete();
+
+            return response()->json(['message' => 'Discount Code deleted successfully'], 204);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Discount Code not found'], 404);
+        }
+    });
+});
+
+Route::prefix('discount-codes')->group(function () {
+    Route::get('/', function (Request $req) {
+        try {
+            $query = DiscountCode::query();
+            if ($req->has('select')) {
+                $select = explode(',', $req['select']);
+                if (in_array('*', $select)) {
+                    $query = $query->select('*');
+                } else {
+                    $query = $query->select($select);
+                }
+            }
+            if ($req->has('code')) {
+                $query->where('code', $req->input('code'));
+            }
+            if ($req->has('is_active')) {
+                $query->where('is_active', $req->input('is_active'));
+            }
+            if ($req->has('type')) {
+                $query->where('type', $req->input('type'));
+            }
+            if ($req->has('min_amount')) {
+                $query->where('min_amount', '<=', $req->input('min_amount'));
+            }
+            if ($req->has('max_discount_amount')) {
+                $query->where('max_discount_amount', '>=', $req->input('max_discount_amount'));
+            }
+            if ($req->has('valid_from')) {
+                $query->where('valid_from', '<=', $req->input('valid_from'));
+            }
+            if ($req->has('valid_to')) {
+                $query->where('valid_to', '>=', $req->input('valid_to'));
+            }
+            if ($req->has('usage_limit')) {
+                $query->where('usage_limit', '>=', $req->input('usage_limit'));
+            }
+            if ($req->has('used_count')) {
+                $query->where('used_count', '<=', $req->input('used_count'));
+            }
+            if ($req->has('order')) {
+                $order = explode('.', $req['order']);
+                $query = $query->orderBy($order[0], $order[1] ?? 'asc');
+            }
+            $res = $query->get();
+
+            return response()->json(['data' => $res], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+
+    Route::get('/{id}', function (int $id) {
+        try {
+            $discountCode = DiscountCode::findOrFail($id);
+
+            return response()->json($discountCode, 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Discount Code not found'], 404);
+        }
+    });
+
+    Route::post('/', function (Request $req) {
+        try {
+            $validatedData = $req->validate([
+                'code' => 'required|string|unique:discount_codes,code',
+                'type' => 'required|string|in:percentage,fixed',
+                'value' => 'required|numeric|min:0',
+                'is_active' => 'boolean',
+                'min_amount' => 'numeric|min:0|nullable',
+                'max_discount_amount' => 'numeric|min:0|nullable',
+                'valid_from' => 'date|nullable',
+                'valid_to' => 'date|after_or_equal:valid_from|nullable',
+                'usage_limit' => 'integer|min:0|nullable',
+                'used_count' => 'integer|min:0|nullable',
+            ]);
+
+            $discountCode = DiscountCode::create($validatedData);
+
+            return response()->json($discountCode, 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+
+    Route::put('/{id}', function (Request $req, int $id) {
+        try {
+            $discountCode = DiscountCode::findOrFail($id);
+
+            $validatedData = $req->validate([
+                'code' => 'string|unique:discount_codes,code,'.$id,
+                'type' => 'string|in:percentage,fixed',
+                'value' => 'numeric|min:0',
+                'is_active' => 'boolean',
+                'min_amount' => 'numeric|min:0|nullable',
+                'max_discount_amount' => 'numeric|min:0|nullable',
+                'valid_from' => 'date|nullable',
+                'valid_to' => 'date|after_or_equal:valid_from|nullable',
+                'usage_limit' => 'integer|min:0|nullable',
+                'used_count' => 'integer|min:0|nullable',
+            ]);
+
+            $discountCode->update($validatedData);
+
+            return response()->json($discountCode, 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+
+    Route::delete('/{id}', function (int $id) {
+        try {
+            $discountCode = DiscountCode::findOrFail($id);
+            $discountCode->delete();
+
+            return response()->json(['message' => 'Discount Code deleted successfully'], 204);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Discount Code not found'], 404);
+        }
+    });
+});
+
+Route::prefix('menu-additional-configs')->group(function () {
     Route::get('/', function (Request $req) {
         try {
             $query = MenuAdditionalConfig::query();
+            if ($req->has('select')) {
+                $select = explode(',', $req['select']);
+                if (in_array('*', $select)) {
+                    $query = $query->select('*');
+                } else {
+                    $query = $query->select($select);
+                }
+            }
+            if ($req->has('menu_id')) {
+                $query->where('menu_id', $req->input('menu_id'));
+            }
+            if ($req->has('additional_id')) {
+                $query->where('additional_id', $req->input('additional_id'));
+            }
+            if ($req->has('created_from')) {
+                $query->where('created_at', '>=', $req->input('created_from'));
+            }
+            if ($req->has('created_to')) {
+                $query->where('created_at', '<=', $req->input('created_to'));
+            }
+            if ($req->has('order')) {
+                $order = explode('.', $req['order']);
+                $query = $query->orderBy($order[0], $order[1] ?? 'asc');
+            }
+            $res = $query->get();
+
+            return response()->json(['data' => $res], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+
+    Route::get('{id}', function ($id) {
+        try {
+            $res = MenuAdditionalConfig::find($id);
+            if (!$res) {
+                return response()->json(['error' => 'MenuAdditionalConfig not found'], 404);
+            }
+            return response()->json(['data' => $res], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+
+    Route::post('/', function (Request $req) {
+        try {
+            $validated = $req->validate([
+                'menu_id' => 'required|exists:menus,id',
+                'additional_id' => 'required|exists:additionals,id',
+            ]);
+
+            $res = new MenuAdditionalConfig();
+            $res->menu_id = $validated['menu_id'];
+            $res->additional_id = $validated['additional_id'];
+            $res->save();
+
+            return response()->json(['data' => $res], 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['error' => $e->errors()], 422);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+
+    Route::put('{id}', function (Request $req, $id) {
+        try {
+            $res = MenuAdditionalConfig::find($id);
+            if (!$res) {
+                return response()->json(['error' => 'MenuAdditionalConfig not found'], 404);
+            }
+
+            $validated = $req->validate([
+                'menu_id' => 'sometimes|exists:menus,id',
+                'additional_id' => 'sometimes|exists:additionals,id',
+            ]);
+
+            if (isset($validated['menu_id'])) {
+                $res->menu_id = $validated['menu_id'];
+            }
+            if (isset($validated['additional_id'])) {
+                $res->additional_id = $validated['additional_id'];
+            }
+            $res->save();
+
+            return response()->json(['data' => $res], 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['error' => $e->errors()], 422);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+
+    Route::delete('{id}', function ($id) {
+        try {
+            $res = MenuAdditionalConfig::find($id);
+            if (!$res) {
+                return response()->json(['error' => 'MenuAdditionalConfig not found'], 404);
+            }
+            $res->delete();
+            return response()->json(['message' => 'MenuAdditionalConfig deleted successfully'], 204);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+});
+
+Route::prefix('menu_additional_config')->group(function () {
+    Route::get('/', function (Request $req) {
+        try {
+            $query = MenuAdditionalsConfig::query();
             if ($req->has('select')) {
                 $select = explode(',', $req['select']);
                 if (in_array('*', $select)) {
@@ -235,7 +795,7 @@ Route::prefix('menu_additional_config')->group(function () {
     });
 });
 
-Route::prefix('menu_allowed_additionals')->group(function () {
+Route::prefix('menu-allowed-additionals')->group(function () {
     Route::get('/', function (Request $req) {
         try {
             $query = MenuAllowedAdditionals::query();
@@ -247,12 +807,179 @@ Route::prefix('menu_allowed_additionals')->group(function () {
                     $query = $query->select($select);
                 }
             }
-
+            if ($req->has('menu_id')) {
+                $query->where('menu_id', $req->input('menu_id'));
+            }
+            if ($req->has('additional_id')) {
+                $query->where('additional_id', $req->input('additional_id'));
+            }
+            if ($req->has('created_from')) {
+                $query->where('created_at', '>=', $req->input('created_from'));
+            }
+            if ($req->has('created_to')) {
+                $query->where('created_at', '<=', $req->input('created_to'));
+            }
+            if ($req->has('order')) {
+                $order = explode('.', $req['order']);
+                $query = $query->orderBy($order[0], $order[1] ?? 'asc');
+            }
             $res = $query->get();
 
             return response()->json(['data' => $res], 200);
         } catch (\Throwable $th) {
             return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+
+    Route::get('/{id}', function (int $id) {
+        try {
+            $menuAllowedAdditionals = MenuAllowedAdditionals::findOrFail($id);
+
+            return response()->json($menuAllowedAdditionals, 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Menu Allowed Additionals not found'], 404);
+        }
+    });
+
+    Route::post('/', function (Request $req) {
+        try {
+            $validatedData = $req->validate([
+                'menu_id' => 'required|integer',
+                'additional_id' => 'required|integer',
+            ]);
+
+            $menuAllowedAdditionals = MenuAllowedAdditionals::create($validatedData);
+
+            return response()->json($menuAllowedAdditionals, 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+
+    Route::put('/{id}', function (Request $req, int $id) {
+        try {
+            $menuAllowedAdditionals = MenuAllowedAdditionals::findOrFail($id);
+
+            $validatedData = $req->validate([
+                'menu_id' => 'integer',
+                'additional_id' => 'integer',
+            ]);
+
+            $menuAllowedAdditionals->update($validatedData);
+
+            return response()->json($menuAllowedAdditionals, 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+
+    Route::delete('/{id}', function (int $id) {
+        try {
+            $menuAllowedAdditionals = MenuAllowedAdditionals::findOrFail($id);
+            $menuAllowedAdditionals->delete();
+
+            return response()->json(['message' => 'Menu Allowed Additionals deleted successfully'], 204);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Menu Allowed Additionals not found'], 404);
+        }
+    });
+});
+
+
+Route::prefix('menu-allowed-additionals')->group(function () {
+    Route::get('/', function (Request $req) {
+        try {
+            $query = MenuAllowedAdditionals::query();
+            if ($req->has('select')) {
+                $select = explode(',', $req['select']);
+                if (in_array('*', $select)) {
+                    $query = $query->select('*');
+                } else {
+                    $query = $query->select($select);
+                }
+            }
+            if ($req->has('menu_id')) {
+                $query->where('menu_id', $req->input('menu_id'));
+            }
+            if ($req->has('additional_id')) {
+                $query->where('additional_id', $req->input('additional_id'));
+            }
+            if ($req->has('created_from')) {
+                $query->where('created_at', '>=', $req->input('created_from'));
+            }
+            if ($req->has('created_to')) {
+                $query->where('created_at', '<=', $req->input('created_to'));
+            }
+            if ($req->has('order')) {
+                $order = explode('.', $req['order']);
+                $query = $query->orderBy($order[0], $order[1] ?? 'asc');
+            }
+            $res = $query->get();
+
+            return response()->json(['data' => $res], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+
+    Route::get('/{id}', function (int $id) {
+        try {
+            $menuAllowedAdditionals = MenuAllowedAdditionals::findOrFail($id);
+
+            return response()->json($menuAllowedAdditionals, 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Menu Allowed Additionals not found'], 404);
+        }
+    });
+
+    Route::post('/', function (Request $req) {
+        try {
+            $validatedData = $req->validate([
+                'menu_id' => 'required|integer',
+                'additional_id' => 'required|integer',
+            ]);
+
+            $menuAllowedAdditionals = MenuAllowedAdditionals::create($validatedData);
+
+            return response()->json($menuAllowedAdditionals, 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+
+    Route::put('/{id}', function (Request $req, int $id) {
+        try {
+            $menuAllowedAdditionals = MenuAllowedAdditionals::findOrFail($id);
+
+            $validatedData = $req->validate([
+                'menu_id' => 'integer',
+                'additional_id' => 'integer',
+            ]);
+
+            $menuAllowedAdditionals->update($validatedData);
+
+            return response()->json($menuAllowedAdditionals, 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
+
+    Route::delete('/{id}', function (int $id) {
+        try {
+            $menuAllowedAdditionals = MenuAllowedAdditionals::findOrFail($id);
+            $menuAllowedAdditionals->delete();
+
+            return response()->json(['message' => 'Menu Allowed Additionals deleted successfully'], 204);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Menu Allowed Additionals not found'], 404);
         }
     });
 });
@@ -592,7 +1319,7 @@ Route::prefix('history_archives')->group(function () {
     });
 });
 
-Route::prefix('pemasukan_lains')->group(function () {
+Route::prefix('pemasukan-lains')->group(function () {
     Route::get('/', function (Request $req) {
         try {
             $query = PemasukanLain::query();
@@ -604,6 +1331,28 @@ Route::prefix('pemasukan_lains')->group(function () {
                     $query = $query->select($select);
                 }
             }
+            if ($req->has('kategori')) {
+                $query->where('kategori', $req->input('kategori'));
+            }
+            if ($req->has('created_by')) {
+                $query->where('created_by', $req->input('created_by'));
+            }
+            if ($req->has('tanggal_from')) {
+                $query->where('tanggal', '>=', $req->input('tanggal_from'));
+            }
+            if ($req->has('tanggal_to')) {
+                $query->where('tanggal', '<=', $req->input('tanggal_to'));
+            }
+            if ($req->has('jumlah_min')) {
+                $query->where('jumlah', '>=', $req->input('jumlah_min'));
+            }
+            if ($req->has('jumlah_max')) {
+                $query->where('jumlah', '<=', $req->input('jumlah_max'));
+            }
+            if ($req->has('order')) {
+                $order = explode('.', $req['order']);
+                $query = $query->orderBy($order[0], $order[1] ?? 'asc');
+            }
             $res = $query->get();
 
             return response()->json(['data' => $res], 200);
@@ -612,11 +1361,33 @@ Route::prefix('pemasukan_lains')->group(function () {
         }
     });
 
+    Route::get('/{id}', function (string $id) {
+        try {
+            $pemasukanLain = PemasukanLain::findOrFail($id);
+
+            return response()->json($pemasukanLain, 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Pemasukan Lain not found'], 404);
+        }
+    });
+
     Route::post('/', function (Request $req) {
         try {
-            $pemasukanLain = PemasukanLain::create($req->all());
+            $validatedData = $req->validate([
+                'id' => 'required|string|unique:pemasukan_lain,id',
+                'kategori' => 'required|string',
+                'deskripsi' => 'string|nullable',
+                'jumlah' => 'required|numeric',
+                'tanggal' => 'required|date',
+                'created_by' => 'string|nullable',
+                'bukti_url' => 'string|nullable',
+            ]);
 
-            return response()->json(['data' => $pemasukanLain, 'message' => 'Pemasukan Lain Created'], 201);
+            $pemasukanLain = PemasukanLain::create($validatedData);
+
+            return response()->json($pemasukanLain, 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
         } catch (\Throwable $th) {
             return response()->json(['error' => 'Internal Server Error'], 500);
         }
@@ -625,9 +1396,21 @@ Route::prefix('pemasukan_lains')->group(function () {
     Route::put('/{id}', function (Request $req, string $id) {
         try {
             $pemasukanLain = PemasukanLain::findOrFail($id);
-            $pemasukanLain->update($req->all());
 
-            return response()->json(['data' => $pemasukanLain, 'message' => 'Pemasukan Lain Updated'], 200);
+            $validatedData = $req->validate([
+                'kategori' => 'string',
+                'deskripsi' => 'string|nullable',
+                'jumlah' => 'numeric',
+                'tanggal' => 'date',
+                'created_by' => 'string|nullable',
+                'bukti_url' => 'string|nullable',
+            ]);
+
+            $pemasukanLain->update($validatedData);
+
+            return response()->json($pemasukanLain, 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
         } catch (\Throwable $th) {
             return response()->json(['error' => 'Internal Server Error'], 500);
         }
@@ -638,9 +1421,9 @@ Route::prefix('pemasukan_lains')->group(function () {
             $pemasukanLain = PemasukanLain::findOrFail($id);
             $pemasukanLain->delete();
 
-            return response()->json(['message' => 'Pemasukan Lain Deleted'], 200);
+            return response()->json(['message' => 'Pemasukan Lain deleted successfully'], 204);
         } catch (\Throwable $th) {
-            return response()->json(['error' => 'Internal Server Error'], 500);
+            return response()->json(['error' => 'Pemasukan Lain not found'], 404);
         }
     });
 });

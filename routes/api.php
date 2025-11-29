@@ -1773,11 +1773,13 @@ Route::prefix('pesanans')->group(function () {
             if ($req->has('no_meja')) {
                 $query->where('no_meja', $req->input('no_meja'));
             }
+            if ($req->has('location_type')) {
+                $input = strtolower($req->input('location_type'));
+                $input = str_replace('-', '_', $input);
+                $query->whereRaw('LOWER(REPLACE(location_type, "-", "_")) = ?', [$input]);
+            }
             if ($req->has('status')) {
                 $query->where('status', explode(',',$req->input('status')));
-            }
-            if ($req->has('location_type')) {
-                $query->where('location_type', $req->input('location_type'))->orWhere('location_type', strtoupper($req->input('location_type')));
             }
             if ($req->has('discount_code')) {
                 $query->where('discount_code', $req->input('discount_code'));

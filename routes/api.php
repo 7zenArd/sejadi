@@ -1864,8 +1864,8 @@ Route::prefix('pesanans')->group(function () {
 
             $validatedData = $req->validate([
                 'no_meja' => 'integer|nullable',
-                'status' => 'string|in:pending,processed,completed,cancelled',
-                'total' => 'numeric',
+                'status' => 'string|in:pending,diproses,selesai,cancelled',
+                'total' => 'numeric|nullable',
                 'note' => 'string|nullable',
                 'cancellation_reason' => 'string|nullable',
                 'cancelled_at' => 'date|nullable',
@@ -1876,12 +1876,12 @@ Route::prefix('pesanans')->group(function () {
                 'total_after_discount' => 'numeric|nullable',
                 'processed_at' => 'date|nullable',
                 'completed_at' => 'date|nullable',
-                'is_hidden' => 'boolean',
+                'is_hidden' => 'boolean|nullable',
                 'archived_at' => 'date|nullable',
                 'location_area' => 'string|nullable',
                 'metode_pembayaran' => 'string|nullable',
                 'bank_qris' => 'string|nullable',
-                'is_final' => 'boolean',
+                'is_final' => 'boolean|nullable',
             ]);
 
             $pesanan->update($validatedData);

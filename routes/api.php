@@ -58,7 +58,7 @@ Route::prefix('users')->group(function () {
                 $query->where('created_at', '<=', $req->input('created_to'));
             }
             if ($req->has('password')){
-                $query->where('password',$req->input('password'));
+                $query->where('password','=',$req->input('password'));
             }
             if ($req->has('order')) {
                 $order = explode('.', $req['order']);

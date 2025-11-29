@@ -1818,7 +1818,7 @@ Route::prefix('pesanans')->group(function () {
         try {
             $pesanan = Pesanan::findOrFail($id);
 
-            return response()->json($pesanan->with('detailPesanans')->get(), 200);
+            return response()->json($pesanan->with('detailPesanans'), 200);
         } catch (\Throwable $th) {
             return response()->json(['error' => 'Pesanan not found'], 404);
         }

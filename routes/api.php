@@ -1315,11 +1315,11 @@ Route::prefix('auth')->group(function () {
             'password' => 'required|string',
         ]);
 
-        if (! Auth::attempt($credentials)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
+        $user = User::where('email', $credentials['email'])->where('password', $credentials['password'])->first();
 
-        $user = Auth::user();
+        if (!$user){
+            return response()->json(['status'=> false],400);
+        }
 
         // Generate bearer token using Sanctum
         $tokenData = [

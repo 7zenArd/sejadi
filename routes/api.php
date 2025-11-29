@@ -1777,7 +1777,7 @@ Route::prefix('pesanans')->group(function () {
                 $query->where('status', explode(',',$req->input('status')));
             }
             if ($req->has('location_type')) {
-                $query->where('location_type', $req->input('location_type'));
+                $query->where('location_type', $req->input('location_type'))->orWhere('location_type', strtoupper($req->input('location_type')));
             }
             if ($req->has('discount_code')) {
                 $query->where('discount_code', $req->input('discount_code'));

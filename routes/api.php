@@ -519,6 +519,30 @@ Route::prefix('menu')->group(function () {
             return response()->json(['error' => 'Menu not found'], 404);
         }
     });
+
+
+    Route::put('/{id}', function (Request $req, int $id) {
+        try {
+            $menu = Menu::findOrFail($id);
+
+            $validatedData = $req->validate([
+                'nama' => 'string|max:255',
+                'harga' => 'numeric|min:0',
+                'kategori_id' => 'integer|exists:kategori_menu,id',
+                'foto' => 'string|max:255|nullable',
+                'deskripsi' => 'string|nullable',
+                'is_active' => 'boolean',
+            ]);
+
+            $menu->update($validatedData);
+
+            return response()->json($menu, 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
 });
 
 Route::prefix('cafe_settings')->group(function () {
@@ -722,7 +746,7 @@ Route::prefix('discount-codes')->group(function () {
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422);
         } catch (\Throwable $th) {
-            return response()->json(['error' => 'Internal Server Error'], 500);
+            return response()->json(['error' => 'Internal Server Error'.$th], 500);
         }
     });
 

@@ -727,7 +727,7 @@ Route::prefix('discount-codes')->group(function () {
     });
 
     Route::post('/', function (Request $req) {
-        try {
+        // try {
             $validatedData = $req->validate([
                 'code' => 'required|string|unique:discount_codes,code',
                 'type' => 'required|string',
@@ -744,11 +744,11 @@ Route::prefix('discount-codes')->group(function () {
             $discountCode = DiscountCode::create($validatedData);
 
             return response()->json($discountCode, 201);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json(['errors' => $e->errors()], 422);
-        } catch (\Throwable $th) {
-            return response()->json(['error' => 'Internal Server Error'.$th], 500);
-        }
+        // } catch (\Illuminate\Validation\ValidationException $e) {
+        //     return response()->json(['errors' => $e->errors()], 422);
+        // } catch (\Throwable $th) {
+        //     return response()->json(['error' => 'Internal Server Error'.$th], 500);
+        // }
     });
 
     Route::put('/{id}', function (Request $req, int $id) {

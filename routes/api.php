@@ -570,6 +570,21 @@ Route::prefix('categories')->group(function () {
             return response()->json(['error' => 'Internal Server Error'], 500);
         }
     });
+    Route::post('/', function (Request $req) {
+        try {
+            $validatedData = $req->validate([
+                'nama' => 'required|string|max:255',
+            ]);
+
+            $kategori = KategoriMenu::create($validatedData);
+
+            return response()->json($kategori, 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
 });
 
 Route::prefix('menu-additional-config')->group(function () {

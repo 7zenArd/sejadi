@@ -705,7 +705,7 @@ Route::prefix('discount-codes')->group(function () {
         try {
             $validatedData = $req->validate([
                 'code' => 'required|string|unique:discount_codes,code',
-                'type' => 'required|string|in:percentage,fixed',
+                'type' => 'required|string',
                 'value' => 'required|numeric|min:0',
                 'is_active' => 'boolean',
                 'min_amount' => 'numeric|min:0|nullable',

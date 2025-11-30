@@ -520,6 +520,16 @@ Route::prefix('menu')->group(function () {
         }
     });
 
+    Route::delete('/{id}', function (int $id) {
+        try {
+            $menu = Menu::findOrFail($id);
+            $menu->delete();
+
+            return response()->json(['message' => 'Menu deleted successfully'], 204);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Menu not found'], 404);
+        }
+    });
 
     Route::put('/{id}', function (Request $req, int $id) {
         try {
@@ -729,10 +739,10 @@ Route::prefix('discount-codes')->group(function () {
     Route::post('/', function (Request $req) {
         // try {
             $validatedData = $req->validate([
-                'code' => 'required|string|unique:discount_codes,code',
-                'type' => 'required|string',
-                'value' => 'required|numeric|min:0',
-                'is_active' => 'boolean',
+                'code' => 'required|string|nullable',
+                'type' => 'required|string|nullable',
+                'value' => 'required|numeric|min:0|nullable',
+                'is_active' => 'boolean|nullable',
                 'min_amount' => 'numeric|min:0|nullable',
                 'max_discount_amount' => 'numeric|min:0|nullable',
                 'valid_from' => 'date|nullable',

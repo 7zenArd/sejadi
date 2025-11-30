@@ -1919,7 +1919,7 @@ Route::prefix('images')->group(function () {
     Route::post('/upload', function (Request $req) {
         try {
             $validated = $req->validate([
-                'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120', // Max 5MB
+                'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp', // Max 5MB
                 'folder' => 'string|nullable', // Optional subfolder
                 'quality' => 'integer|min:1|max:100|nullable', // Compression quality (default: 80)
             ]);

@@ -822,7 +822,7 @@ Route::prefix('discount-codes')->group(function () {
 
     // New method to apply a discount code
     Route::post('/apply', function (Request $req) {
-        try {
+        // try {
             $validated = $req->validate([
                 'code' => 'required|string',
                 'order_amount' => 'required|numeric|min:0',
@@ -849,7 +849,7 @@ Route::prefix('discount-codes')->group(function () {
             }
 
             $discount = 0;
-            if ($code->type === 'percentage') {
+            if ($code->type === 'percent') {
                 $discount = $validated['order_amount'] * ($code->value / 100);
                 if ($code->max_discount_amount && $discount > $code->max_discount_amount) {
                     $discount = $code->max_discount_amount;
@@ -863,11 +863,11 @@ Route::prefix('discount-codes')->group(function () {
                 'discount_amount' => round($discount, 2),
                 'total_after_discount' => round($validated['order_amount'] - $discount, 2),
             ], 200);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json(['errors' => $e->errors()], 422);
-        } catch (\Throwable $th) {
-            return response()->json(['error' => 'Internal Server Error'], 500);
-        }
+        // } catch (\Illuminate\Validation\ValidationException $e) {
+        //     return response()->json(['errors' => $e->errors()], 422);
+        // } catch (\Throwable $th) {
+        //     return response()->json(['error' => 'Internal Server Error'], 500);
+        // }
     });
 });
 

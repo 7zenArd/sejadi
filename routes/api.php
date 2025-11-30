@@ -842,10 +842,6 @@ Route::prefix('discount-codes')->group(function () {
                     $q->whereNull('min_amount')
                       ->orWhere('min_amount', '<=', $validated['order_amount']);
                 })
-                ->where(function ($q) {
-                    $q->whereNull('usage_limit')
-                      ->orWhereRaw('used_count < usage_limit');
-                })
                 ->first();
 
             if (!$code) {

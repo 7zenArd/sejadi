@@ -541,7 +541,6 @@ Route::prefix('menu')->group(function () {
                 'kategori_id' => 'integer|exists:kategori_menu,id',
                 'available_variants' => 'array||nullable',
                 'foto' => 'string|max:255|nullable',
-                'deskripsi' => 'string|nullable',
                 'stok' => 'integer|min:0|nullable',
                 'is_active' => 'boolean|nullable',
             ]);

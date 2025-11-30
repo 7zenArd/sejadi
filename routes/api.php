@@ -758,12 +758,12 @@ Route::prefix('discount-codes')->group(function () {
     });
 
     Route::post('/', function (Request $req) {
-        // try {
+        try {
             $validatedData = $req->validate([
-                'code' => 'required|string|nullable',
-                'type' => 'required|string|nullable',
-                'value' => 'required|numeric|min:0|nullable',
-                'is_active' => 'boolean|nullable',
+                'code' => 'required|string|unique:discount_codes,code',
+                'type' => 'required|string|in:percentage,fixed',
+                'value' => 'required|numeric|min:0',
+                'is_active' => 'boolean',
                 'min_amount' => 'numeric|min:0|nullable',
                 'max_discount_amount' => 'numeric|min:0|nullable',
                 'valid_from' => 'date|nullable',
@@ -775,11 +775,11 @@ Route::prefix('discount-codes')->group(function () {
             $discountCode = DiscountCode::create($validatedData);
 
             return response()->json($discountCode, 201);
-        // } catch (\Illuminate\Validation\ValidationException $e) {
-        //     return response()->json(['errors' => $e->errors()], 422);
-        // } catch (\Throwable $th) {
-        //     return response()->json(['error' => 'Internal Server Error'.$th], 500);
-        // }
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
     });
 
     Route::put('/{id}', function (Request $req, int $id) {
@@ -819,9 +819,63 @@ Route::prefix('discount-codes')->group(function () {
             return response()->json(['error' => 'Discount Code not found'], 404);
         }
     });
+
+    // New method to apply a discount code
+    Route::post('/apply', function (Request $req) {
+        try {
+            $validated = $req->validate([
+                'code' => 'required|string',
+                'order_amount' => 'required|numeric|min:0',
+            ]);
+
+            $code = DiscountCode::where('code', $validated['code'])
+                ->where('is_active', true)
+                ->where(function ($q) {
+                    $q->whereNull('valid_from')
+                      ->orWhere('valid_from', '<=', now());
+                })
+                ->where(function ($q) {
+                    $q->whereNull('valid_to')
+                      ->orWhere('valid_to', '>=', now());
+                })
+                ->where(function ($q) use ($validated) {
+                    $q->whereNull('min_amount')
+                      ->orWhere('min_amount', '<=', $validated['order_amount']);
+                })
+                ->where(function ($q) {
+                    $q->whereNull('usage_limit')
+                      ->orWhereRaw('used_count < usage_limit');
+                })
+                ->first();
+
+            if (!$code) {
+                return response()->json(['error' => 'Invalid or expired discount code'], 400);
+            }
+
+            $discount = 0;
+            if ($code->type === 'percentage') {
+                $discount = $validated['order_amount'] * ($code->value / 100);
+                if ($code->max_discount_amount && $discount > $code->max_discount_amount) {
+                    $discount = $code->max_discount_amount;
+                }
+            } else { // fixed
+                $discount = $code->value;
+            }
+
+            return response()->json([
+                'discount_code' => $code->code,
+                'discount_amount' => round($discount, 2),
+                'total_after_discount' => round($validated['order_amount'] - $discount, 2),
+            ], 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
 });
 
-Route::prefix('discount-codes')->group(function () {
+Route::prefix('')->group(function () {
     Route::get('/', function (Request $req) {
         try {
             $query = DiscountCode::query();

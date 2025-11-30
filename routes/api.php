@@ -1802,6 +1802,9 @@ Route::prefix('pesanans')->group(function () {
             if ($req->has('created_to')) {
                 $query->where('created_at', '<=', $req->input('created_to'));
             }
+            if ($req->has('payment_date')){
+                $query->whereDate('updated_at', $req->input('payment_date'));
+            }
             if ($req->has('order')) {
                 $order = explode('.', $req['order']);
                 $query = $query->orderBy($order[0], $order[1] ?? 'asc');

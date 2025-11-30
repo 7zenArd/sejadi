@@ -530,6 +530,27 @@ Route::prefix('menu')->group(function () {
             return response()->json(['error' => 'Menu not found'], 404);
         }
     });
+    Route::post('/', function (Request $req) {
+        try {
+            $validatedData = $req->validate([
+                'nama' => 'required|string|max:255',
+                'harga' => 'required|numeric|min:0',
+                'kategori_id' => 'required|integer|exists:kategori_menu,id',
+                'available_variants' => 'array|nullable',
+                'foto' => 'string|max:255|nullable',
+                'stok' => 'integer|min:0|nullable',
+                'is_active' => 'boolean|nullable',
+            ]);
+
+            $menu = Menu::create($validatedData);
+
+            return response()->json($menu, 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    });
 
     Route::put('/{id}', function (Request $req, int $id) {
         try {

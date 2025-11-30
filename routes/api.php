@@ -1677,6 +1677,12 @@ Route::prefix('pengeluarans')->group(function () {
             if ($req->has('jumlah_max')) {
                 $query->where('jumlah', '<=', $req->input('jumlah_max'));
             }
+            if ($req->has('start_date')) {
+                $query->where('tanggal', '>=', $req->input('start_date'));
+            }
+            if ($req->has('end_date')) {
+                $query->where('tanggal', '<=', $req->input('end_date'));
+            }
             if ($req->has('order')) {
                 $order = explode('.', $req['order']);
                 $query = $query->orderBy($order[0], $order[1] ?? 'asc');
@@ -1905,6 +1911,162 @@ Route::prefix('pesanans')->group(function () {
             return response()->json(['message' => 'Pesanan deleted successfully'], 204);
         } catch (\Throwable $th) {
             return response()->json(['error' => 'Pesanan not found'], 404);
+        }
+    });
+});
+
+Route::prefix('images')->group(function () {
+    Route::post('/upload', function (Request $req) {
+        try {
+            $validated = $req->validate([
+                'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120', // Max 5MB
+                'folder' => 'string|nullable', // Optional subfolder
+                'quality' => 'integer|min:1|max:100|nullable', // Compression quality (default: 80)
+            ]);
+
+            $image = $req->file('image');
+            $folder = $validated['folder'] ?? 'general';
+            $quality = $validated['quality'] ?? 80; // Default compression quality
+            
+            $originalSize = $image->getSize();
+            $mimeType = $image->getMimeType();
+            $extension = $image->getClientOriginalExtension();
+            
+            // Generate unique filename
+            $filename = time() . '_' . uniqid() . '.' . $extension;
+            
+            // Create directory if it doesn't exist
+            $storagePath = storage_path('app/public/images/' . $folder);
+            if (!file_exists($storagePath)) {
+                mkdir($storagePath, 0755, true);
+            }
+            
+            $fullPath = $storagePath . '/' . $filename;
+            
+            // Compress and save image based on type
+            $imageResource = null;
+            $compressed = false;
+            
+            switch ($mimeType) {
+                case 'image/jpeg':
+                case 'image/jpg':
+                    $imageResource = imagecreatefromjpeg($image->getRealPath());
+                    if ($imageResource) {
+                        imagejpeg($imageResource, $fullPath, $quality);
+                        $compressed = true;
+                    }
+                    break;
+                    
+                case 'image/png':
+                    $imageResource = imagecreatefrompng($image->getRealPath());
+                    if ($imageResource) {
+                        // PNG compression level: 0 (no compression) to 9 (max compression)
+                        $pngQuality = floor((100 - $quality) / 11);
+                        imagepng($imageResource, $fullPath, $pngQuality);
+                        $compressed = true;
+                    }
+                    break;
+                    
+                case 'image/webp':
+                    $imageResource = imagecreatefromwebp($image->getRealPath());
+                    if ($imageResource) {
+                        imagewebp($imageResource, $fullPath, $quality);
+                        $compressed = true;
+                    }
+                    break;
+                    
+                case 'image/gif':
+                    $imageResource = imagecreatefromgif($image->getRealPath());
+                    if ($imageResource) {
+                        imagegif($imageResource, $fullPath);
+                        $compressed = true;
+                    }
+                    break;
+                    
+                default:
+                    // Fallback: just move the file without compression
+                    $image->storeAs('images/' . $folder, $filename, 'public');
+                    break;
+            }
+            
+            // Free up memory
+            if ($imageResource) {
+                imagedestroy($imageResource);
+            }
+            
+            // If compression failed, use original file
+            if (!$compressed && !file_exists($fullPath)) {
+                $image->storeAs('images/' . $folder, $filename, 'public');
+            }
+            
+            $path = 'images/' . $folder . '/' . $filename;
+            $compressedSize = file_exists($fullPath) ? filesize($fullPath) : $originalSize;
+            
+            // Generate full URL
+            $url = url('storage/' . $path);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Image uploaded and compressed successfully',
+                'data' => [
+                    'filename' => $filename,
+                    'path' => $path,
+                    'url' => $url,
+                    'full_url' => $url,
+                    'original_size' => $originalSize,
+                    'compressed_size' => $compressedSize,
+                    'size_reduction' => round((($originalSize - $compressedSize) / $originalSize) * 100, 2) . '%',
+                    'mime_type' => $mimeType,
+                    'quality' => $quality,
+                ]
+            ], 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Failed to upload image',
+                'message' => $th->getMessage()
+            ], 500);
+        }
+    });
+
+    Route::get('/{folder}/{filename}', function (string $folder, string $filename) {
+        try {
+            $filePath = storage_path('app/public/images/' . $folder . '/' . $filename);
+            
+            if (!file_exists($filePath)) {
+                return response()->json(['error' => 'Image not found'], 404);
+            }
+            
+            return response()->file($filePath);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Failed to retrieve image'], 500);
+        }
+    });
+
+    Route::delete('/{folder}/{filename}', function (string $folder, string $filename) {
+        try {
+            $filePath = storage_path('app/public/images/' . $folder . '/' . $filename);
+            
+            if (!file_exists($filePath)) {
+                return response()->json(['error' => 'Image not found'], 404);
+            }
+            
+            unlink($filePath);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Image deleted successfully'
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Failed to delete image'
+            ], 500);
         }
     });
 });

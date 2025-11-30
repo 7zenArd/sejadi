@@ -822,7 +822,7 @@ Route::prefix('discount-codes')->group(function () {
 
     // New method to apply a discount code
     Route::post('/apply', function (Request $req) {
-        // try {
+        try {
             $validated = $req->validate([
                 'code' => 'required|string',
                 'order_amount' => 'required|numeric|min:0',
@@ -863,11 +863,11 @@ Route::prefix('discount-codes')->group(function () {
                 'discount_amount' => round($discount, 2),
                 'total_after_discount' => round($validated['order_amount'] - $discount, 2),
             ], 200);
-        // } catch (\Illuminate\Validation\ValidationException $e) {
-        //     return response()->json(['errors' => $e->errors()], 422);
-        // } catch (\Throwable $th) {
-        //     return response()->json(['error' => 'Internal Server Error'], 500);
-        // }
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
     });
 });
 
@@ -1764,14 +1764,6 @@ Route::prefix('pesanans')->group(function () {
     Route::get('/', function (Request $req) {
         try {
             $query = Pesanan::query();
-            if ($req->has('select')) {
-                $select = explode(',', $req['select']);
-                if (in_array('*', $select)) {
-                    $query = $query->select('*');
-                } else {
-                    $query = $query->select($select);
-                }
-            }
             if ($req->has('no_meja')) {
                 $query->where('no_meja', $req->input('no_meja'));
             }
@@ -1810,6 +1802,14 @@ Route::prefix('pesanans')->group(function () {
             if ($req->has('order')) {
                 $order = explode('.', $req['order']);
                 $query = $query->orderBy($order[0], $order[1] ?? 'asc');
+            }
+            if ($req->has('select')) {
+                $select = explode(',', $req['select']);
+                if (in_array('*', $select)) {
+                    $query = $query->select('*');
+                } else {
+                    $query = $query->select($select);
+                }
             }
             $res = $query->with('detailPesanans')->get();
 

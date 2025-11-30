@@ -526,12 +526,13 @@ Route::prefix('menu')->group(function () {
             $menu = Menu::findOrFail($id);
 
             $validatedData = $req->validate([
-                'nama' => 'string|max:255',
-                'harga' => 'numeric|min:0',
+                'nama' => 'string|max:255|nullable',
+                'harga' => 'numeric|min:0|nullable',
                 'kategori_id' => 'integer|exists:kategori_menu,id',
                 'foto' => 'string|max:255|nullable',
                 'deskripsi' => 'string|nullable',
-                'is_active' => 'boolean',
+                'stok' => 'integer|min:0|nullable',
+                'is_active' => 'boolean|nullable',
             ]);
 
             $menu->update($validatedData);

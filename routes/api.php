@@ -539,6 +539,7 @@ Route::prefix('menu')->group(function () {
                 'nama' => 'string|max:255|nullable',
                 'harga' => 'numeric|min:0|nullable',
                 'kategori_id' => 'integer|exists:kategori_menu,id',
+                'available_variants' => 'array||nullable',
                 'foto' => 'string|max:255|nullable',
                 'deskripsi' => 'string|nullable',
                 'stok' => 'integer|min:0|nullable',

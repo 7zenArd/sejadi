@@ -20,6 +20,7 @@ class DetailPesanan extends Model
         'menu_id',
         'jumlah',
         'subtotal',
+        'printed',
         'note',
         'varian',
         'additionals',

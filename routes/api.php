@@ -1281,6 +1281,28 @@ Route::prefix('detail_pesanan')->group(function () {
         return response()->json($res, 200);
     });
 
+    Route::put('/{id}', function (Request $req, int $id) {
+        try {
+            $detailPesanan = DetailPesanan::findOrFail($id);
+            $detailPesanan->update($req->all());
+
+            return response()->json(['message' => 'Detail Pesanan updated successfully', 'data' => $detailPesanan], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Detail Pesanan not found or update failed'], 404);
+        }
+    });
+
+    Route::delete('/{id}', function (int $id) {
+        try {
+            $detailPesanan = DetailPesanan::findOrFail($id);
+            $detailPesanan->delete();
+
+            return response()->json(['message' => 'Detail Pesanan deleted successfully'], 204);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Detail Pesanan not found'], 404);
+        }
+    });
+
     Route::post('/', function (Request $req) {
         foreach ($req->all() as $key => $value) {
             $payload = [

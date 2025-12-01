@@ -1786,40 +1786,40 @@ Route::prefix('pesanans')->group(function () {
     Route::get('/', function (Request $req) {
         try {
             $query = Pesanan::query();
-            if ($req->has('no_meja')) {
-                $query->where('no_meja', $req->input('no_meja'));
-            }
             if ($req->has('location_type')) {
                 $input = strtolower($req->input('location_type'));
                 $input = str_replace('-', '_', $input);
-                $query->whereRaw('LOWER(REPLACE(location_type, "-", "_")) = ?', [$input]);
+                $query = $query->whereRaw('LOWER(REPLACE(location_type, "-", "_")) = ?', [$input]);
             }
             if ($req->has('status')) {
-                $query->where('status', explode(',',$req->input('status')));
+                $query = $query->where('status', explode(',',$req->input('status')));
+            }
+            if ($req->has('no_meja')) {
+                $query = $query->where('no_meja', $req->input('no_meja'));
             }
             if ($req->has('discount_code')) {
-                $query->where('discount_code', $req->input('discount_code'));
+                $query = $query->where('discount_code', $req->input('discount_code'));
             }
             if ($req->has('is_hidden')) {
-                $query->where('is_hidden', $req->input('is_hidden'));
+                $query = $query->where('is_hidden', $req->input('is_hidden'));
             }
             if ($req->has('is_final')) {
-                $query->where('is_final', $req->input('is_final'));
+                $query = $query->where('is_final', $req->input('is_final'));
             }
             if ($req->has('total_min')) {
-                $query->where('total', '>=', $req->input('total_min'));
+                $query = $query->where('total', '>=', $req->input('total_min'));
             }
             if ($req->has('total_max')) {
-                $query->where('total', '<=', $req->input('total_max'));
+                $query = $query->where('total', '<=', $req->input('total_max'));
             }
             if ($req->has('created_from')) {
-                $query->where('created_at', '>=', $req->input('created_from'));
+                $query = $query->where('created_at', '>=', $req->input('created_from'));
             }
             if ($req->has('created_to')) {
-                $query->where('created_at', '<=', $req->input('created_to'));
+                $query = $query->where('created_at', '<=', $req->input('created_to'));
             }
             if ($req->has('payment_date')){
-                $query->whereDate('updated_at', $req->input('payment_date'));
+                $query = $query->whereDate('updated_at', $req->input('payment_date'));
             }
             if ($req->has('order')) {
                 $order = explode('.', $req['order']);

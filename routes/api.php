@@ -1792,7 +1792,7 @@ Route::prefix('pesanans')->group(function () {
                 $query = $query->whereRaw('LOWER(REPLACE(location_type, "-", "_")) = ?', [$input]);
             }
             if ($req->has('status')) {
-                $query = $query->where('status', explode(',',$req->input('status')));
+                $query = $query->whereIn('status', explode(',',$req->input('status')));
             }
             if ($req->has('no_meja')) {
                 $query = $query->where('no_meja', $req->input('no_meja'));
